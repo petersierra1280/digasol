@@ -35,18 +35,13 @@ function mapReceipts(item) {
         id,
         cliente: properties["Cliente"].relation[0].id,
         fecha_prestamo: properties["Fecha prestamo"].date.start,
-        cilindros: properties["Cilindros"].relation.map(function(cilindro) {
-            return {
-                id: cilindro.id
-            }
-        }),
         numero_recibo: properties["Numero recibo"].unique_id.number,
         total_pagar: properties["Total a pagar"].formula.number
     }
 };
 
-// Se filtran las siguientes props: Cliente, Fecha prestamo, Cilindros, Numero recibo y total a pagar
-const receiptsFilteredProps = ["~%60mE", "%7C%3AWJ", "%7C%60Gg", "YXYo", "r%5B~s"];
+// Se filtran las siguientes props: Cliente, Fecha prestamo, Numero recibo y total a pagar
+const receiptsFilteredProps = ["~%60mE", "%7C%3AWJ", "YXYo", "r%5B~s"];
 
 module.exports = {
     getBorrowedReceipts,
