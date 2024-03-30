@@ -34,7 +34,11 @@ function mapReceipts(item) {
     return {
         cliente: properties["Cliente"].relation[0].id,
         fecha_prestamo: properties["Fecha prestamo"].date.start,
-        cilindros: properties["Cilindros"].relation[0].id,
+        cilindros: properties["Cilindros"].relation.map(function(cilindro) {
+            return {
+                id: cilindro.id
+            }
+        }),
         numero_recibo: properties["Numero recibo"].unique_id.number
     }
 };
