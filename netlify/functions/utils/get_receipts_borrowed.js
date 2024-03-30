@@ -1,3 +1,11 @@
+const { NOTION_API_KEY, NOTION_API_VERSION } = process.env;
+
+const notionApiHeaders = {
+    'Authorization': `Bearer ${NOTION_API_KEY}`,
+    'Content-Type': 'application/json',
+    'Notion-Version': NOTION_API_VERSION
+};
+
 const getBorrowedReceipts = `{
     "filter": {
         "and": [
@@ -44,6 +52,7 @@ function mapReceipts(item) {
 };
 
 module.exports = {
+    notionApiHeaders,
     getBorrowedReceipts,
     mapReceipts
 }

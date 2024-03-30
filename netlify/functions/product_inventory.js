@@ -1,23 +1,25 @@
 exports.handler = async event => {
-    const { getBorrowedReceipts: body, mapReceipts } = require('./utils/get_receipts_borrowed');
+    const { NOTION_API_URL, NOTION_DATABASE_RECEIPTS } = process.env;
+    const { notionApiHeaders: headers, getBorrowedReceipts: body, mapReceipts } = require('./utils/get_receipts_borrowed');
+
     // Se filtran las siguientes props: Cliente, Fecha prestamo, Cilindros y Numero recibo
-    const NOTION_FILTERED_PROPS = "?filter_properties=~%60mE&filter_properties=%7C%3AWJ&filter_properties=%7C%60Gg&filter_properties=YXYo";
-    const NOTION_API_URL = `https://api.notion.com/v1/databases/a054beb907b04f2ba291e45715175922/query${NOTION_FILTERED_PROPS}`
-    const { NOTION_API_KEY, NOTION_API_VERSION } = process.env;
+    const filteredProps = ["~%60mE", "%7C%3AWJ", "%7C%60Gg", "YXYo"];
+    const NOTION_FILTERED_PROPS = filteredProps.map(function (prop, index) {
+        const prefix = index === 0 ? '?' : '&';
+        return `${prefix}filter_properties=${prop}`;
+    }).join('');
+
+    const REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_RECEIPTS}/query${NOTION_FILTERED_PROPS}`
 
     try {
         // Obtiene los recibos prestados a clientes
-        const response = await fetch(NOTION_API_URL, {
+        const response = await fetch(REQUEST_URL, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${NOTION_API_KEY}`,
-                'Content-Type': 'application/json',
-                'Notion-Version': NOTION_API_VERSION
-            },
+            headers,
             body,
         });
-        const data = await response.json();
-        const receipts = data.results.map(mapReceipts);
+        const receiptsData = await response.json();
+        const receipts = receiptsData.results.map(mapReceipts);
         return {
             statusCode: 200,
             body: JSON.stringify(receipts),
