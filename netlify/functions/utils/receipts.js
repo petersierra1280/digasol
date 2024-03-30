@@ -1,11 +1,3 @@
-const { NOTION_API_KEY, NOTION_API_VERSION } = process.env;
-
-const notionApiHeaders = {
-    'Authorization': `Bearer ${NOTION_API_KEY}`,
-    'Content-Type': 'application/json',
-    'Notion-Version': NOTION_API_VERSION
-};
-
 const getBorrowedReceipts = `{
     "filter": {
         "and": [
@@ -51,8 +43,11 @@ function mapReceipts(item) {
     }
 };
 
+// Se filtran las siguientes props: Cliente, Fecha prestamo, Cilindros y Numero recibo
+const receiptsFilteredProps = ["~%60mE", "%7C%3AWJ", "%7C%60Gg", "YXYo"];
+
 module.exports = {
-    notionApiHeaders,
     getBorrowedReceipts,
-    mapReceipts
+    mapReceipts,
+    receiptsFilteredProps
 }
