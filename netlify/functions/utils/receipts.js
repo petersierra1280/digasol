@@ -30,8 +30,9 @@ const getBorrowedReceipts = `{
 }`;
 
 function mapReceipts(item) {
-    const { properties } = item;
+    const { properties, id } = item;
     return {
+        id,
         cliente: properties["Cliente"].relation[0].id,
         fecha_prestamo: properties["Fecha prestamo"].date.start,
         cilindros: properties["Cilindros"].relation.map(function(cilindro) {
