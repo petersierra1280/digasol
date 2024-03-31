@@ -101,7 +101,7 @@ exports.handler = async event => {
         await createInventoryForReceipts(receiptsCompleteList);
 
         return {
-            statusCode: 200,
+            statusCode: receiptsCompleteList.length === 0 ? 304 : 200,
             body: JSON.stringify(receiptsCompleteList),
         }
     } catch (error) {
