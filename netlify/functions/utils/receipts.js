@@ -38,8 +38,7 @@ function mapReceipts(item) {
             nombre: properties["Nombre cliente"].rollup.array[0].title[0].plain_text
         },
         fecha_prestamo: properties["Fecha prestamo"].date.start,
-        numero_recibo: properties["Numero recibo"].unique_id.number,
-        total_pagar: properties["Total a pagar"].formula.number
+        numero_recibo: properties["Numero recibo"].unique_id.number
     }
 };
 
