@@ -65,7 +65,7 @@ const getReceiptsWithCylinders = async (receiptsWithoutInventory) => {
 
 //#region Crear inventario de ventas
 const createInventoryForReceipts = async (receipts) => {
-    receipts.forEach(receipt => {
+    Promise.all(receipts.map(receipt => {
         const { cliente: { nombre: nombre_cliente }, fecha_prestamo: fecha_venta, numero_recibo, total_pagar, cilindros } = receipt;
         const baseInfo = {
             cliente: nombre_cliente,
@@ -89,7 +89,7 @@ const createInventoryForReceipts = async (receipts) => {
                 body: createInventoryItem(item, NOTION_DATABASE_INVENTORY)
             });
         }));
-    });
+    }));
 }
 //#endregion
 
