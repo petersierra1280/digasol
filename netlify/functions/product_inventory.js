@@ -65,7 +65,7 @@ const getReceiptsWithCylinders = async (receiptsWithoutInventory) => {
 
 //#region Crear inventario de ventas
 const createInventoryForReceipts = async (receipts) => {
-    Promise.all(receipts.map(async receipt => {
+    await Promise.all(receipts.map(async receipt => {
         const { cliente: { nombre: nombre_cliente }, fecha_prestamo: fecha_venta, numero_recibo, total_pagar, cilindros } = receipt;
         const baseInfo = {
             cliente: nombre_cliente,
