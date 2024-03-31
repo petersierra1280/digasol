@@ -3,7 +3,7 @@ const { NOTION_API_URL, NOTION_DATABASE_RECEIPTS, NOTION_DATABASE_CYLINDERS, NOT
 const { notionApiHeaders: headers, mapFilteredProps } = require('./utils/index');
 const { getBorrowedReceipts, mapReceipts, receiptsFilteredProps } = require('./utils/receipts');
 const { getCylindersFromReceipt, mapCylinders, cylindersFilteredProps } = require('./utils/cylinders');
-const { getInventoryList, mapInventoryItem, inventoryFilteredProps } = require('./utils/inventory');
+const { getInventoryList, mapInventoryItem, inventoryFilteredProps, createInventoryItem } = require('./utils/inventory');
 //#endregion
 
 //#region Obtiene los recibos prestados a clientes
@@ -14,7 +14,7 @@ const getReceipts = async () => {
     const responseReceipts = await fetch(RECEIPTS_REQUEST_URL, {
         method: 'POST',
         headers,
-        body: getBorrowedReceipts,
+        body: getBorrowedReceipts
     });
     const receiptsData = await responseReceipts.json();
     return receiptsData.results.map(mapReceipts);
@@ -30,7 +30,7 @@ const getReceiptsWithoutInventory = async (receipts) => {
     const responseInventory = await fetch(INVENTORY_REQUEST_URL, {
         method: 'POST',
         headers,
-        body: getInventoryList(receiptsList),
+        body: getInventoryList(receiptsList)
     });
     const inventoryData = await responseInventory.json();
     const inventoryList = inventoryData.results.map(mapInventoryItem);
@@ -63,11 +63,42 @@ const getReceiptsWithCylinders = async (receiptsWithoutInventory) => {
 }
 //#endregion
 
+//#region Crear inventario de ventas
+const createInventoryForReceipts = async (receipts) => {
+    receipts.forEach(receipt => {
+        const { cliente: { nombre: nombre_cliente }, fecha_prestamo: fecha_venta, numero_recibo, total_pagar, cilindros } = receipt;
+        const baseInfo = {
+            cliente: nombre_cliente,
+            fecha_venta,
+            numero_recibo,
+            total_pagar
+        };
+        const inventoryInfo = cilindros.map(cilindro => {
+            const { clase_gas, cantidad_producto, serial } = cilindro;
+            return {
+                ...baseInfo,
+                serial,
+                clase_gas,
+                cantidad_producto
+            }
+        });
+        Promise.all(inventoryInfo.map(async item => {
+            await fetch(`${NOTION_API_URL}/pages`, {
+                method: 'POST',
+                headers,
+                body: createInventoryItem(item, NOTION_DATABASE_INVENTORY)
+            });
+        }));
+    });
+}
+//#endregion
+
 exports.handler = async event => {
     try {
         const receiptsBaseList = await getReceipts();
         const receiptsWithoutInventory = await getReceiptsWithoutInventory(receiptsBaseList);
         const receiptsCompleteList = await getReceiptsWithCylinders(receiptsWithoutInventory);
+        await createInventoryForReceipts(receiptsCompleteList);
 
         return {
             statusCode: 200,
