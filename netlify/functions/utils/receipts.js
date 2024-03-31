@@ -43,8 +43,8 @@ function mapReceipts(item) {
     }
 };
 
-// Se filtran las siguientes props: Cliente, Fecha prestamo, Numero recibo y total a pagar
-const receiptsFilteredProps = ["~%60mE", "YgE%3F", "%7C%3AWJ", "YXYo", "r%5B~s"];
+// Se filtran las siguientes props: Cliente, Fecha prestamo y Numero recibo
+const receiptsFilteredProps = ["~%60mE", "YgE%3F", "%7C%3AWJ", "YXYo"];
 
 module.exports = {
     getBorrowedReceipts,

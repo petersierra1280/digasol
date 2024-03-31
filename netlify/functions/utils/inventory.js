@@ -33,7 +33,7 @@ function mapInventoryItem(item) {
 const inventoryFilteredProps = ["D%7B%40f"];
 
 const createInventoryItem = (item, database_id) => {
-    const { cliente, fecha_venta, numero_recibo, total_pagar, cantidad_producto, serial, clase_gas } = item;
+    const { cliente, fecha_venta, numero_recibo, cantidad_producto, serial, clase_gas } = item;
     return `{
         "parent": { "database_id": "${database_id}" },
         "properties": {
@@ -66,7 +66,6 @@ const createInventoryItem = (item, database_id) => {
             },
             "Numero recibo": { "number": ${numero_recibo} },
             "Total producto": { "number": ${cantidad_producto} },
-            "Total pagado": { "number": ${total_pagar} },
             "Fecha venta": { "date": { "start": "${fecha_venta}" } }
         }
     }`;
