@@ -32,12 +32,13 @@ function mapCylinders(item) {
     return {
         id,
         clase_gas: properties["Clase de gas"].select.name,
-        cantidad_producto: properties["Cantidad producto"].formula.number
+        cantidad_producto: properties["Cantidad producto"].formula.number,
+        serial: properties["Serial"].title[0].plain_text
     }
 };
 
 // Se filtran las siguientes props: Clase de gas, cantidad producto
-const cylindersFilteredProps = ["nwIs", "mGna"];
+const cylindersFilteredProps = ["nwIs", "mGna", "title"];
 
 module.exports = {
     getCylindersFromReceipt,
