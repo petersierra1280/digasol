@@ -33,7 +33,10 @@ function mapReceipts(item) {
     const { properties, id } = item;
     return {
         id,
-        cliente: properties["Cliente"].relation[0].id,
+        cliente: {
+            id: properties["Cliente"].relation[0].id,
+            nombre: properties["Nombre cliente"].rollup.array[0].title[0].plain_text
+        },
         fecha_prestamo: properties["Fecha prestamo"].date.start,
         numero_recibo: properties["Numero recibo"].unique_id.number,
         total_pagar: properties["Total a pagar"].formula.number
@@ -41,7 +44,7 @@ function mapReceipts(item) {
 };
 
 // Se filtran las siguientes props: Cliente, Fecha prestamo, Numero recibo y total a pagar
-const receiptsFilteredProps = ["~%60mE", "%7C%3AWJ", "YXYo", "r%5B~s"];
+const receiptsFilteredProps = ["~%60mE", "YgE%3F", "%7C%3AWJ", "YXYo", "r%5B~s"];
 
 module.exports = {
     getBorrowedReceipts,
