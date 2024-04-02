@@ -1,9 +1,9 @@
 //#region Import references
 const { NOTION_API_URL, NOTION_DATABASE_RECEIPTS, NOTION_DATABASE_CYLINDERS, NOTION_DATABASE_INVENTORY } = process.env;
-const { notionApiHeaders: headers, mapFilteredProps } = require('./utils/index');
-const { getBorrowedReceipts, mapReceipts, receiptsFilteredProps } = require('./utils/receipts');
-const { getCylindersFromReceipt, mapCylinders, cylindersFilteredProps } = require('./utils/cylinders');
-const { getInventoryList, mapInventoryItem, inventoryFilteredProps, createInventoryItem } = require('./utils/inventory');
+const { notionApiHeaders: headers, mapFilteredProps } = require('../../utils/index');
+const { getBorrowedReceipts, mapReceipts, receiptsFilteredProps } = require('../../utils/receipts');
+const { getCylindersFromReceipt, mapCylinders, cylindersFilteredProps } = require('../../utils/cylinders');
+const { getInventoryList, mapInventoryItem, inventoryFilteredProps, createInventoryItem } = require('../../utils/inventory');
 //#endregion
 
 //#region Obtiene los recibos prestados a clientes
