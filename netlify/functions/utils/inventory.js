@@ -1,9 +1,9 @@
 function inventoryItems(items) {
     return items.map(function (item) {
         return `{
-            "property": "Numero recibo",
-            "number": {
-                "equals": ${item}
+            "property": "Orden",
+            "relation": {
+                "contains": "${item}"
             }
         }`;
     });
@@ -25,7 +25,7 @@ function mapInventoryItem(item) {
     const { properties, id } = item;
     return {
         id,
-        numero_recibo: properties["Numero recibo"].number
+        numero_recibo: parseInt(properties["Numero recibo"].formula.string)
     }
 };
 
@@ -33,7 +33,7 @@ function mapInventoryItem(item) {
 const inventoryFilteredProps = ["D%7B%40f"];
 
 const createInventoryItem = (item, database_id) => {
-    const { cliente, fecha_venta, numero_recibo, cantidad_producto, serial, clase_gas } = item;
+    const { id_recibo, cantidad_producto, serial, clase_gas } = item;
     return `{
         "parent": { "database_id": "${database_id}" },
         "properties": {
@@ -42,15 +42,6 @@ const createInventoryItem = (item, database_id) => {
                     {
                         "text": {
                             "content": "${serial}"
-                        }
-                    }
-                ]
-            },
-            "Cliente": {
-                "rich_text": [
-                    {
-                        "text": {
-                            "content": "${cliente}"
                         }
                     }
                 ]
@@ -64,9 +55,8 @@ const createInventoryItem = (item, database_id) => {
                     }
                 ]
             },
-            "Numero recibo": { "number": ${numero_recibo} },
             "Total producto": { "number": ${cantidad_producto} },
-            "Fecha venta": { "date": { "start": "${fecha_venta}" } }
+            "Orden": { "relation": [{ "id": "${id_recibo}" }] }
         }
     }`;
 }
