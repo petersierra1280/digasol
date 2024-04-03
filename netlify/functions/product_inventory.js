@@ -2,7 +2,7 @@
 const { NOTION_API_URL, NOTION_DATABASE_RECEIPTS, NOTION_DATABASE_CYLINDERS, NOTION_DATABASE_INVENTORY } = process.env;
 const { notionApiHeaders: headers, mapFilteredProps } = require('../../utils/index');
 const { getBorrowedReceipts, mapReceipts, receiptsFilteredProps } = require('../../utils/receipts');
-const { getCylindersFromReceipt, mapCylinders, cylindersFilteredProps } = require('../../utils/cylinders');
+const { getCylindersFromReceipt, mapCylinders, cylindersInventoryFilteredProps } = require('../../utils/cylinders');
 const { getInventoryList, mapInventoryItem, inventoryFilteredProps, createInventoryItem } = require('../../utils/inventory');
 //#endregion
 
@@ -49,7 +49,7 @@ const getReceiptsWithoutInventory = async (receipts) => {
 //#region Obtener cilindros asociados al recibo
 const getReceiptsWithCylinders = async (receiptsWithoutInventory) => {
     return await Promise.all(receiptsWithoutInventory.map(async function (receipt) {
-        const CYLINDERS_FILTERED_PROPS = mapFilteredProps(cylindersFilteredProps);
+        const CYLINDERS_FILTERED_PROPS = mapFilteredProps(cylindersInventoryFilteredProps);
         const CYLINDERS_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_CYLINDERS}/query${CYLINDERS_FILTERED_PROPS}`
         const responseCylinders = await fetch(CYLINDERS_REQUEST_URL, {
             method: 'POST',
@@ -57,7 +57,7 @@ const getReceiptsWithCylinders = async (receiptsWithoutInventory) => {
             body: getCylindersFromReceipt(receipt.id)
         });
         const cylindersData = await responseCylinders.json();
-        receipt.cilindros = cylindersData.results.map(mapCylinders);
+        receipt.cilindros = cylindersData.results.map(item => mapCylinders(item, 'INVENTORY'));
         return receipt;
     }));
 }
@@ -102,7 +102,7 @@ exports.handler = async event => {
             body: JSON.stringify(receiptsCompleteList),
         }
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return {
             statusCode: 500,
             body: `Failed fetching Notion data`,
