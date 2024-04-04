@@ -12,6 +12,7 @@ const getReceipts = async () => {
     const RECEIPTS_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_RECEIPTS}/query${RECEIPTS_FILTERED_PROPS}`
 
     const responseReceipts = await fetch(RECEIPTS_REQUEST_URL, {
+        keepalive: true,
         method: 'POST',
         headers,
         body: getBorrowedReceipts
@@ -28,6 +29,7 @@ const getReceiptsWithoutInventory = async (receipts) => {
 
     const receiptsList = receipts.map(receipt => receipt.id);
     const responseInventory = await fetch(INVENTORY_REQUEST_URL, {
+        keepalive: true,
         method: 'POST',
         headers,
         body: getInventoryList(receiptsList)
@@ -52,6 +54,7 @@ const getReceiptsWithCylinders = async (receiptsWithoutInventory) => {
         const CYLINDERS_FILTERED_PROPS = mapFilteredProps(cylindersInventoryFilteredProps);
         const CYLINDERS_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_CYLINDERS}/query${CYLINDERS_FILTERED_PROPS}`
         const responseCylinders = await fetch(CYLINDERS_REQUEST_URL, {
+            keepalive: true,
             method: 'POST',
             headers,
             body: getCylindersFromReceipt(receipt.id)
@@ -81,6 +84,7 @@ const createInventoryForReceipts = async (receipts) => {
         });
         await Promise.all(inventoryInfo.map(async item => {
             await fetch(`${NOTION_API_URL}/pages`, {
+                keepalive: true,
                 method: 'POST',
                 headers,
                 body: createInventoryItem(item, NOTION_DATABASE_INVENTORY)
