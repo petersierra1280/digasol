@@ -8,12 +8,13 @@ const { getComparisonList, updateComparisonItem, getHTMLSummary, mapComparisonLi
 //#region Obtener cilindros del proveedor
 const getCylinders = async (providerName) => {
     const CYLINDERS_FILTERED_PROPS = mapFilteredProps(cylindersComparisonFilteredProps);
-    const CYLINDERS_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_CYLINDERS}/query${CYLINDERS_FILTERED_PROPS}`
+    const CYLINDERS_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_CYLINDERS}/query${CYLINDERS_FILTERED_PROPS}`;
 
     const cylinderItems = [];
     let nextPage = null, hasMore = true;
     while (hasMore) {
         const responseCylinders = await fetch(CYLINDERS_REQUEST_URL, {
+            keepalive: true,
             method: 'POST',
             headers,
             body: getCylindersByProvider(providerName, nextPage)
@@ -23,7 +24,7 @@ const getCylinders = async (providerName) => {
             cylinderItems.push(...results.map(item => mapCylinders(item, 'COMPARISON')));
         }
         nextPage = next_cursor;
-        hasMore = has_more
+        hasMore = has_more;
     }
     return cylinderItems;
 }
@@ -32,12 +33,13 @@ const getCylinders = async (providerName) => {
 //#region Obtiene los registros de la BD de comparacion
 const getComparisonItems = async () => {
     const COMPARISON_FILTERED_PROPS = mapFilteredProps(comparisonFilteredProps);
-    const COMPARISON_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_COMPARISON}/query${COMPARISON_FILTERED_PROPS}`
+    const COMPARISON_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_COMPARISON}/query${COMPARISON_FILTERED_PROPS}`;
 
     const comparisonItems = [];
     let nextPage = null, hasMore = true;
     while (hasMore) {
         const responseComparison = await fetch(COMPARISON_REQUEST_URL, {
+            keepalive: true,
             method: 'POST',
             headers,
             body: getComparisonList(nextPage)
@@ -47,7 +49,7 @@ const getComparisonItems = async () => {
             comparisonItems.push(...results.map(mapComparisonList));
         }
         nextPage = next_cursor;
-        hasMore = has_more
+        hasMore = has_more;
     }
     return comparisonItems;
 }
@@ -59,25 +61,18 @@ const compareCylinders = async (comparisonItems, cylinders) => {
 
     if (comparisonItems && comparisonItems.length > 0) {
         await Promise.all(comparisonItems.map(async item => {
+            let cylinderFound = false, providerDate, digasolDate;
             const { id: comparisonId, serial: serialCylinderProvider, fecha_entrega: deliveryDate } = item;
             const cylinderOwnedByDigasol = cylinders.find(cylinder => cylinder.serial === serialCylinderProvider);
 
             if (cylinderOwnedByDigasol) {
                 foundCylinders++;
+                cylinderFound = true;
                 const { recepcion_proveedor: receptionDate } = cylinderOwnedByDigasol;
-                const providerDate = new Date(deliveryDate);
-                const digasolDate = new Date(receptionDate);
+                providerDate = new Date(deliveryDate);
+                digasolDate = new Date(receptionDate);
                 const datesDiff = Math.floor((providerDate.getTime() - digasolDate.getTime()) / (1000 * 60 * 60 * 24));
 
-                await fetch(`${NOTION_API_URL}/pages/${comparisonId}`, {
-                    method: 'PATCH',
-                    headers,
-                    body: updateComparisonItem({
-                        fecha_entrega: providerDate.toISOString(),
-                        encontrado: true,
-                        fecha_recepcion: digasolDate.toISOString()
-                    })
-                });
                 // Se soporta un margen de tolerancia de 1 dia de diferencia
                 if ([1, 0, -1].includes(datesDiff)) {
                     cylindersEqual++;
@@ -86,7 +81,21 @@ const compareCylinders = async (comparisonItems, cylinders) => {
                 }
             } else {
                 notFoundCylinders++;
+                cylinderFound = false;
+                providerDate = '';
+                digasolDate = '';
             }
+
+            await fetch(`${NOTION_API_URL}/pages/${comparisonId}`, {
+                keepalive: true,
+                method: 'PATCH',
+                headers,
+                body: updateComparisonItem({
+                    fecha_entrega: providerDate ? providerDate.toISOString() : '',
+                    encontrado: cylinderFound,
+                    fecha_recepcion: digasolDate ? digasolDate.toISOString() : ''
+                })
+            });
         }));
     }
     return {
