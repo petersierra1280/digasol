@@ -71,12 +71,15 @@ function mapComparisonList(item) {
     return {
         id,
         serial: properties["Serial cilindro"].title[0].plain_text,
-        fecha_entrega: properties["Fecha proveedor"].rich_text[0].plain_text
+        fecha_proveedor: properties["Fecha proveedor"].rich_text[0].plain_text,
+        encontrado: properties["Encontrado"].checkbox,
+        fecha_entrega: properties["Fecha entrega"].date?.start
+        
     }
 };
 
-// Se filtran las siguientes props: Serial cilindro y Fecha proveedor
-const comparisonFilteredProps = ["title", "z%5E%60M"];
+// Se filtran las siguientes props: Serial cilindro, Fecha proveedor, Encontrado y Fecha entrega
+const comparisonFilteredProps = ["title", "z%5E%60M", "k~Al", "%5Dql_"];
 
 module.exports = {
     getComparisonList,
