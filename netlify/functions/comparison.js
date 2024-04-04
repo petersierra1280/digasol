@@ -114,7 +114,7 @@ const compareCylinders = async (comparisonItems, cylinders) => {
                     })
                 });
                 if (status === 429) {
-                    console.error('Notion API rate limit exceeded!');
+                    console.error(`Notion API rate limit exceeded! | Item ID ${comparisonId} not updated`);
                 }
             }
         }));
