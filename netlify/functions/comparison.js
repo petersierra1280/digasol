@@ -71,7 +71,13 @@ const compareCylinders = async (comparisonItems, cylinders) => {
     if (comparisonItems && comparisonItems.length > 0) {
         await Promise.all(comparisonItems.map(async item => {
             let cylinderFound = false, providerDate, digasolDate;
-            const { id: comparisonId, serial: serialCylinderProvider, fecha_entrega: deliveryDate } = item;
+            const {
+                id: comparisonId,
+                serial: serialCylinderProvider,
+                fecha_proveedor: deliveryDate,
+                encontrado: recordFound,
+                fecha_entrega: deliveryDateMapped = ''
+            } = item;
             const cylinderOwnedByDigasol = cylinders.find(cylinder => cylinder.serial === serialCylinderProvider);
 
             if (cylinderOwnedByDigasol) {
@@ -95,18 +101,20 @@ const compareCylinders = async (comparisonItems, cylinders) => {
                 digasolDate = '';
             }
 
-            const { status } = await fetch(`${NOTION_API_URL}/pages/${comparisonId}`, {
-                keepalive: true,
-                method: 'PATCH',
-                headers,
-                body: updateComparisonItem({
-                    fecha_entrega: providerDate ? providerDate.toISOString() : '',
-                    encontrado: cylinderFound,
-                    fecha_recepcion: digasolDate ? digasolDate.toISOString() : ''
-                })
-            });
-            if (status === 429) {
-                console.error('Notion API rate limit exceeded!');
+            if (cylinderFound != recordFound || (providerDate && providerDate.toISOString() != deliveryDateMapped)) {
+                const { status } = await fetch(`${NOTION_API_URL}/pages/${comparisonId}`, {
+                    keepalive: true,
+                    method: 'PATCH',
+                    headers,
+                    body: updateComparisonItem({
+                        fecha_entrega: providerDate ? providerDate.toISOString() : '',
+                        encontrado: cylinderFound,
+                        fecha_recepcion: digasolDate ? digasolDate.toISOString() : ''
+                    })
+                });
+                if (status === 429) {
+                    console.error('Notion API rate limit exceeded!');
+                }
             }
         }));
     }
