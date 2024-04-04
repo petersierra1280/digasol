@@ -99,9 +99,10 @@ const compareCylinders = async (comparisonItems, cylinders) => {
                 cylinderFound = false;
                 providerDate = '';
                 digasolDate = '';
-            }
+            }            
 
-            if (cylinderFound != recordFound || (providerDate && providerDate.toISOString() != deliveryDateMapped)) {
+            if (cylinderFound != recordFound ||
+                (providerDate && deliveryDateMapped && providerDate.toISOString() != new Date(deliveryDateMapped).toISOString())) {
                 const { status } = await fetch(`${NOTION_API_URL}/pages/${comparisonId}`, {
                     keepalive: true,
                     method: 'PATCH',
