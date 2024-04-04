@@ -19,7 +19,11 @@ const getCylinders = async (providerName) => {
             headers,
             body: getCylindersByProvider(providerName, nextPage)
         });
-        const { results, next_cursor, has_more } = await responseCylinders.json();
+        const { results, next_cursor, has_more, status } = await responseCylinders.json();
+        if (status === 429) {
+            console.error('Notion API rate limit exceeded!');
+            break;
+        }
         if (results) {
             cylinderItems.push(...results.map(item => mapCylinders(item, 'COMPARISON')));
         }
@@ -44,7 +48,12 @@ const getComparisonItems = async () => {
             headers,
             body: getComparisonList(nextPage)
         });
-        const { results, next_cursor, has_more } = await responseComparison.json();
+        const info = await responseComparison.json();
+        const { results, next_cursor, has_more, status } = info
+        if (status === 429) {
+            console.error('Notion API rate limit exceeded!');
+            break;
+        }
         if (results) {
             comparisonItems.push(...results.map(mapComparisonList));
         }
@@ -86,7 +95,7 @@ const compareCylinders = async (comparisonItems, cylinders) => {
                 digasolDate = '';
             }
 
-            await fetch(`${NOTION_API_URL}/pages/${comparisonId}`, {
+            const { status } = await fetch(`${NOTION_API_URL}/pages/${comparisonId}`, {
                 keepalive: true,
                 method: 'PATCH',
                 headers,
@@ -96,6 +105,9 @@ const compareCylinders = async (comparisonItems, cylinders) => {
                     fecha_recepcion: digasolDate ? digasolDate.toISOString() : ''
                 })
             });
+            if (status === 429) {
+                console.error('Notion API rate limit exceeded!');
+            }
         }));
     }
     return {
