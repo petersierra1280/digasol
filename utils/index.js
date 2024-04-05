@@ -13,7 +13,13 @@ function mapFilteredProps(props) {
     }).join('');
 }
 
+function getISODate(date) {
+    const timeZoneOffset = (new Date()).getTimezoneOffset() * 60000; // offset in milliseconds
+    return (new Date(date.getTime() - timeZoneOffset)).toISOString().slice(0, -1);
+}
+
 module.exports = {
     notionApiHeaders,
-    mapFilteredProps
+    mapFilteredProps,
+    getISODate
 }

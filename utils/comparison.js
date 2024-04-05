@@ -1,3 +1,5 @@
+const { TZ = 'America/Bogota' } = process.env;
+
 const getComparisonList = (cursorId) => `{
     ${cursorId ? `"start_cursor": "${cursorId}"` : ''}
 }`;
@@ -5,13 +7,13 @@ const getComparisonList = (cursorId) => `{
 const updateComparisonItem = ({ fecha_entrega, encontrado, fecha_recepcion }) => `{
     "properties": {
         "Fecha entrega": {
-            "date": ${ fecha_entrega ? `{ "start": "${fecha_entrega}" }`: `null` }
+            "date": ${ fecha_entrega ? `{ "start": "${fecha_entrega}", "time_zone": "${TZ}" }`: `null` }
         },
         "Encontrado": {
             "checkbox": ${encontrado}
         },
         "Fecha recepcion": {
-            "date": ${ fecha_recepcion ? `{ "start": "${fecha_recepcion}" }`: `null` }
+            "date": ${ fecha_recepcion ? `{ "start": "${fecha_recepcion}", "time_zone": "${TZ}" }`: `null` }
         }
     }
 }`;
