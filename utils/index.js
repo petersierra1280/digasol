@@ -19,7 +19,7 @@ function getISODate(date) {
 }
 
 function daysBetween(date1, date2) {
-    return Math.floor((date1.getTime() - date2.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.ceil((date1.getTime() - date2.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 module.exports = {
