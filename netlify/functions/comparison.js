@@ -1,6 +1,6 @@
 //#region Import references
 const { NOTION_API_URL, NOTION_DATABASE_CYLINDERS, NOTION_DATABASE_COMPARISON } = process.env;
-const { notionApiHeaders: headers, mapFilteredProps } = require('../../utils/index');
+const { notionApiHeaders: headers, mapFilteredProps, getISODate } = require('../../utils/index');
 const { getCylindersByProvider, mapCylinders, cylindersComparisonFilteredProps } = require('../../utils/cylinders');
 const { getComparisonList, updateComparisonItem, getHTMLSummary, mapComparisonList, comparisonFilteredProps } = require('../../utils/comparison');
 //#endregion
@@ -108,9 +108,9 @@ const compareCylinders = async (comparisonItems, cylinders) => {
                     method: 'PATCH',
                     headers,
                     body: updateComparisonItem({
-                        fecha_entrega: providerDate ? providerDate.toISOString() : '',
+                        fecha_entrega: providerDate ? getISODate(providerDate) : '',
                         encontrado: cylinderFound,
-                        fecha_recepcion: digasolDate ? digasolDate.toISOString() : ''
+                        fecha_recepcion: digasolDate ? getISODate(digasolDate) : ''
                     })
                 });
                 if (status === 429) {
