@@ -18,8 +18,13 @@ function getISODate(date) {
     return (new Date(date.getTime() - timeZoneOffset)).toISOString().slice(0, -1);
 }
 
+function daysBetween(date1, date2) {
+    return Math.floor((date1.getTime() - date2.getTime()) / (1000 * 60 * 60 * 24));
+}
+
 module.exports = {
     notionApiHeaders,
     mapFilteredProps,
-    getISODate
+    getISODate,
+    daysBetween
 }
