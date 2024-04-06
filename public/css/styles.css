@@ -35,6 +35,14 @@ body {
     text-align: left;
 }
 
+#comparison-output table td:nth-child(1) {
+    text-align: right;
+}
+
+#comparison-output table td:nth-child(2) {
+    padding-left: 5px;
+}
+
 @media (min-width: 800px) {
     body {
         font-size: 16px;
