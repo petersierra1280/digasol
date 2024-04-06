@@ -1,8 +1,27 @@
 //#region Import references
-const { NOTION_API_URL, NOTION_DATABASE_CYLINDERS, NOTION_DATABASE_COMPARISON } = process.env;
-const { notionApiHeaders: headers, mapFilteredProps, getISODate } = require('../../utils/index');
-const { getCylindersByProvider, mapCylinders, cylindersComparisonFilteredProps } = require('../../utils/cylinders');
-const { getComparisonList, updateComparisonItem, getHTMLSummary, mapComparisonList, comparisonFilteredProps } = require('../../utils/comparison');
+const {
+    NOTION_API_URL,
+    NOTION_DATABASE_CYLINDERS,
+    NOTION_DATABASE_COMPARISON
+} = process.env;
+const {
+    notionApiHeaders: headers,
+    mapFilteredProps,
+    getISODate,
+    daysBetween
+} = require('../../utils/index');
+const {
+    getCylindersByProvider,
+    mapCylinders,
+    cylindersComparisonFilteredProps
+} = require('../../utils/cylinders');
+const {
+    getComparisonList,
+    updateComparisonItem,
+    getHTMLSummary,
+    mapComparisonList,
+    comparisonFilteredProps
+} = require('../../utils/comparison');
 //#endregion
 
 //#region Obtener cilindros del proveedor
@@ -86,7 +105,7 @@ const compareCylinders = async (comparisonItems, cylinders) => {
                 const { recepcion_proveedor: receptionDate } = cylinderOwnedByDigasol;
                 providerDate = new Date(deliveryDate);
                 digasolDate = new Date(receptionDate);
-                const datesDiff = Math.floor((providerDate.getTime() - digasolDate.getTime()) / (1000 * 60 * 60 * 24));
+                const datesDiff = daysBetween(providerDate, digasolDate);
 
                 // Se soporta un margen de tolerancia de 1 dia de diferencia
                 if ([1, 0, -1].includes(datesDiff)) {
@@ -99,10 +118,11 @@ const compareCylinders = async (comparisonItems, cylinders) => {
                 cylinderFound = false;
                 providerDate = '';
                 digasolDate = '';
-            }            
+            }
 
             if (cylinderFound != recordFound ||
-                (providerDate && deliveryDateMapped && providerDate.toISOString() != new Date(deliveryDateMapped).toISOString())) {
+                (providerDate && deliveryDateMapped && providerDate.toISOString() != new Date(deliveryDateMapped).toISOString())
+            ) {
                 const { status } = await fetch(`${NOTION_API_URL}/pages/${comparisonId}`, {
                     keepalive: true,
                     method: 'PATCH',
