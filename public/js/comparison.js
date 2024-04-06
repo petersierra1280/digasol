@@ -11,7 +11,7 @@ async function getComparisonSummary() {
             const { status } = response;
             requestStatus = status;
             attempts++;
-            
+
             if (status === 200) {
                 const comparisonData = await response.json();
                 writeSummary({ ...comparisonData });
@@ -55,36 +55,37 @@ function writeSummary({
 }) {
     updateStatusHTML(
         `<h2>Resultados de la comparaci&oacute;n</h2>
-        <ul>
-            <li>
-                <strong>Nombre proveedor: </strong>
-                <span>${providerName}</span>
-            </li>
-            <li>
-                <strong>Total items a comparar: </strong>
-                <span>${totalComparisonItems}</span>
-            </li>
-            <li>
-                <strong>Total cilindros del proveedor: </strong>
-                <span>${totalCylinders}</span>
-            </li>
-            <li>
-                <strong>Cilindros encontrados: </strong>
-                <span>${foundCylinders}</span>
-            </li>
-            <li>
-                <strong>Cilindros no encontrados: </strong>
-                <span>${notFoundCylinders}</span>
-            </li>
-            <li>
-                <strong>Cilindros iguales: </strong>
-                <span>${cylindersEqual}</span>
-            </li>
-            <li>
-                <strong>Cilindros con diferencias: </strong>
-                <span>${cylindersWithDifferences}</span>
-            </li>
-        </ul>
+        <table>
+            <tr>
+              <td><strong>Nombre proveedor:</strong></td>
+              <td>${providerName}</td>
+            </tr>
+            <tr>
+              <td><strong>Total items a comparar:</td>
+              <td>${totalComparisonItems}</td>
+            </tr>
+            <tr>
+              <td><strong>Total cilindros del proveedor:</td>
+              <td>${totalCylinders}</td>
+            </tr>
+            <tr>
+              <td><strong>Cilindros encontrados:</td>
+              <td>${foundCylinders}</td>
+            </tr>
+            <tr>
+              <td><strong>Cilindros no encontrados:</td>
+              <td>${notFoundCylinders}</td>
+            </tr>
+            <tr>
+              <td><strong>Cilindros iguales:</td>
+              <td>${cylindersEqual}</td>
+            </tr>
+            <tr>
+              <td><strong>Cilindros con diferencias:</td>
+              <td>${cylindersWithDifferences}</td>
+            </tr>
+        </table>
+
         <div>
             <p>
                 Por favor, regresar al <strong>Cruce de Cuentas con Proveedores</strong> en Notion para consultar m&aacute;s detalles.
