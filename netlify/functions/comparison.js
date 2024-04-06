@@ -18,7 +18,6 @@ const {
 const {
     getComparisonList,
     updateComparisonItem,
-    getHTMLSummary,
     mapComparisonList,
     comparisonFilteredProps
 } = require('../../utils/comparison');
@@ -161,13 +160,10 @@ exports.handler = async event => {
 
         return {
             statusCode: 200,
-            headers: {
-                'Content-type': 'text/html; charset=UTF-8',
-            },
-            body: getHTMLSummary({
+            body: JSON.stringify({
                 providerName,
-                comparisonItems,
-                cylinders,
+                totalComparisonItems: comparisonItems.length,
+                totalCylinders: cylinders.length,
                 ...comparisonResults
             })
         }
