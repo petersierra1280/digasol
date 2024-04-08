@@ -63,6 +63,7 @@ function mapCylinders(item, cameFrom) {
         case 'COMPARISON':
             const { type, date = {} } = properties["Recepcion proveedor"].formula;
             baseProps.recepcion_proveedor = type === 'date' ? date.start : '';
+            baseProps.detalles_devolucion = properties["Detalles devolucion proveedor"].formula.string
             break;
     }
     return baseProps;
@@ -70,8 +71,8 @@ function mapCylinders(item, cameFrom) {
 
 // Se filtran las siguientes props: Clase de gas, cantidad producto
 const cylindersInventoryFilteredProps = ["nwIs", "mGna", "title"];
-// Recepcion proveedor, Serial
-const cylindersComparisonFilteredProps = ["aUM%5E", "title"];
+// Recepcion proveedor y Detalles devolucion proveedor
+const cylindersComparisonFilteredProps = ["aUM%5E", "title", "WLxn"];
 
 module.exports = {
     getCylindersFromReceipt,

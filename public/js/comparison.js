@@ -51,7 +51,8 @@ function writeSummary({
     foundCylinders,
     notFoundCylinders,
     cylindersEqual,
-    cylindersWithDifferences
+    cylindersWithDifferences,
+    cylindersReturnedToProvider
 }) {
     updateStatusHTML(
         `<h2>Resultados de la comparaci&oacute;n</h2>
@@ -83,6 +84,10 @@ function writeSummary({
             <tr>
               <td><strong>Cilindros con diferencias:</td>
               <td>${cylindersWithDifferences}</td>
+            </tr>
+            <tr>
+              <td><strong>Cilindros regresados a proveedor:</td>
+              <td>${cylindersReturnedToProvider}</td>
             </tr>
         </table>
 
