@@ -1,4 +1,5 @@
 const PROVIDER_QUERY_PARAM = 'proveedor';
+const MAX_ATTEMPTS = 3;
 
 async function getComparisonSummary() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -16,7 +17,7 @@ async function getComparisonSummary() {
                 const comparisonData = await response.json();
                 writeSummary({ ...comparisonData });
             }
-        } while (requestStatus != 200 && attempts < 3);
+        } while (requestStatus != 200 && attempts < MAX_ATTEMPTS);
 
         if (requestStatus === 500) {
             showErrorMessage();
@@ -51,7 +52,8 @@ function writeSummary({
     foundCylinders,
     notFoundCylinders,
     cylindersEqual,
-    cylindersWithDifferences
+    cylindersWithDifferences,
+    cylindersReturnedToProvider
 }) {
     updateStatusHTML(
         `<h2>Resultados de la comparaci&oacute;n</h2>
@@ -83,6 +85,10 @@ function writeSummary({
             <tr>
               <td><strong>Cilindros con diferencias:</td>
               <td>${cylindersWithDifferences}</td>
+            </tr>
+            <tr>
+              <td><strong>Cilindros regresados a proveedor:</td>
+              <td>${cylindersReturnedToProvider}</td>
             </tr>
         </table>
 
