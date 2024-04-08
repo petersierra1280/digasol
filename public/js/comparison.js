@@ -1,4 +1,5 @@
 const PROVIDER_QUERY_PARAM = 'proveedor';
+const MAX_ATTEMPTS = 3;
 
 async function getComparisonSummary() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -16,7 +17,7 @@ async function getComparisonSummary() {
                 const comparisonData = await response.json();
                 writeSummary({ ...comparisonData });
             }
-        } while (requestStatus != 200 && attempts < 3);
+        } while (requestStatus != 200 && attempts < MAX_ATTEMPTS);
 
         if (requestStatus === 500) {
             showErrorMessage();

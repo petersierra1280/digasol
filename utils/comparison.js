@@ -38,7 +38,7 @@ function mapComparisonList(item) {
     return {
         id,
         serial: properties["Serial cilindro"].title[0].plain_text,
-        fecha_proveedor: properties["Fecha proveedor"].rich_text[0].plain_text,
+        fecha_proveedor: properties["Fecha proveedor"].rich_text[0]?.plain_text,
         encontrado: properties["Encontrado"].checkbox,
         fecha_entrega: properties["Fecha entrega"].date?.start,
         fecha_recepcion: properties["Fecha recepcion"].date?.start,

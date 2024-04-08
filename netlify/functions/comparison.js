@@ -92,7 +92,7 @@ const compareCylinders = async (comparisonItems, cylinders) => {
             const {
                 id: comparisonId,
                 serial: serialCylinderProvider,
-                fecha_proveedor: deliveryDate,
+                fecha_proveedor: deliveryDate = '',
                 encontrado: recordFound,
                 fecha_entrega: deliveryDateMapped = '',
                 fecha_recepcion: receptionDateMapped = '',
@@ -107,12 +107,12 @@ const compareCylinders = async (comparisonItems, cylinders) => {
                     recepcion_proveedor: receptionDate = '',
                     detalles_devolucion: returnDetails = ''
                 } = cylinderOwnedByDigasol;
-                providerDate = new Date(deliveryDate);
+                providerDate = deliveryDate ? new Date(deliveryDate) : '';
                 digasolDate = receptionDate ? new Date(receptionDate) : '';
                 providerReturnDetails = returnDetails;
 
                 if (digasolDate) {
-                    const datesDiff = daysBetween(providerDate, digasolDate);
+                    const datesDiff = !providerDate ? -99 : daysBetween(providerDate, digasolDate);
                     // Se soporta un margen de tolerancia de 1 dia de diferencia
                     if ([1, 0, -1].includes(datesDiff)) {
                         cylindersEqual++;
@@ -127,10 +127,12 @@ const compareCylinders = async (comparisonItems, cylinders) => {
                 cylinderFound = false;
                 providerDate = '';
                 digasolDate = '';
+                providerReturnDetails = '';
             }
 
             if (cylinderFound != recordFound ||
                 (providerDate && deliveryDateMapped && providerDate.toISOString() != new Date(deliveryDateMapped).toISOString()) ||
+                (deliveryDate === '' && deliveryDateMapped !== '') ||
                 (deliveryDateMapped === '' && providerDate !== '') ||
                 (!digasolDate && (receptionDateMapped !== '' || providerReturnDetails !== comparisonReturnDetails))
             ) {
