@@ -46,22 +46,39 @@ const getReceiptsWithoutInventory = async (receipts) => {
     const INVENTORY_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_INVENTORY}/query${INVENTORY_FILTERED_PROPS}`
 
     const receiptsList = receipts.map(receipt => receipt.id);
-    const responseInventory = await fetch(INVENTORY_REQUEST_URL, {
-        keepalive: true,
-        method: 'POST',
-        headers,
-        body: getInventoryList(receiptsList)
-    });
-    const inventoryData = await responseInventory.json();
-    const inventoryList = inventoryData.results.map(mapInventoryItem);
-
     const receiptsWithoutInventory = [];
-    receipts.forEach(item => {
-        const result = inventoryList.find(inventory => inventory.numero_recibo === item.numero_recibo);
-        if (!result) {
-            receiptsWithoutInventory.push(item);
+
+    if (receiptsList.length > 0) {
+        const inventoryList = [];
+        let nextPage = null, hasMore = true;
+        while (hasMore) {
+            const responseInventory = await fetch(INVENTORY_REQUEST_URL, {
+                keepalive: true,
+                method: 'POST',
+                headers,
+                body: getInventoryList(receiptsList, nextPage)
+            });
+            const { results, next_cursor, has_more, status } = await responseInventory.json();
+            if (status === 429) {
+                console.error('Notion API rate limit exceeded!');
+                break;
+            }
+            if (results) {
+                inventoryList.push(...results.map(mapInventoryItem));
+            }
+            nextPage = next_cursor;
+            hasMore = has_more;
         }
-    });
+
+        for (let index = 0; index < receipts.length; index++) {
+            const item = receipts[index];
+            const result = inventoryList.find(inventory => inventory.numero_recibo === item.numero_recibo);
+            if (!result) {
+                receiptsWithoutInventory.push(item);
+            }
+        }
+    }
+
     return receiptsWithoutInventory;
 }
 //#endregion
@@ -116,12 +133,15 @@ exports.handler = async event => {
     try {
         const receiptsBaseList = await getReceipts();
         const receiptsWithoutInventory = await getReceiptsWithoutInventory(receiptsBaseList);
-        const receiptsCompleteList = await getReceiptsWithCylinders(receiptsWithoutInventory);
-        await createInventoryForReceipts(receiptsCompleteList);
+        let receiptsSummary = [];
+        if (receiptsWithoutInventory && receiptsWithoutInventory.length > 0) {
+            receiptsSummary = await getReceiptsWithCylinders(receiptsWithoutInventory);
+            await createInventoryForReceipts(receiptsSummary);
+        }
 
         return {
             statusCode: 200,
-            body: JSON.stringify(receiptsCompleteList),
+            body: JSON.stringify(receiptsSummary),
         }
     } catch (error) {
         console.error(error);

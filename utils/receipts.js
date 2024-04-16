@@ -24,6 +24,12 @@ const getBorrowedReceipts = `{
                 "relation": {
                     "is_not_empty": true
                 }
+            },
+            {
+                "property": "Inventario",
+                "relation": {
+                    "is_empty": true
+                }
             }
         ]
     }

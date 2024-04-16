@@ -9,8 +9,8 @@ function inventoryItems(items) {
     });
 }
 
-const getInventoryList = (items) => `{
-    "filter": {
+const getInventoryList = (items, cursorId) => {
+    let query = `"filter": {
         "and": [
             {
                 "or": [
@@ -18,8 +18,12 @@ const getInventoryList = (items) => `{
                 ]
             }
         ]
+    }`;
+    if (cursorId) {
+        query += `, "start_cursor": "${cursorId}"`;
     }
-}`;
+    return `{ ${query} }`;
+};
 
 function mapInventoryItem(item) {
     const { properties, id } = item;
