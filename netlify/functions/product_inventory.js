@@ -46,36 +46,39 @@ const getReceiptsWithoutInventory = async (receipts) => {
     const INVENTORY_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_INVENTORY}/query${INVENTORY_FILTERED_PROPS}`
 
     const receiptsList = receipts.map(receipt => receipt.id);
-
-    const inventoryList = [];
-    let nextPage = null, hasMore = true;
-    while (hasMore) {
-        const responseInventory = await fetch(INVENTORY_REQUEST_URL, {
-            keepalive: true,
-            method: 'POST',
-            headers,
-            body: getInventoryList(receiptsList, nextPage)
-        });
-        const { results, next_cursor, has_more, status } = await responseInventory.json();
-        if (status === 429) {
-            console.error('Notion API rate limit exceeded!');
-            break;
-        }
-        if (results) {
-            inventoryList.push(...results.map(mapInventoryItem));
-        }
-        nextPage = next_cursor;
-        hasMore = has_more;
-    }
-
     const receiptsWithoutInventory = [];
-    for (let index = 0; index < receipts.length; index++) {
-        const item = receipts[index];
-        const result = inventoryList.find(inventory => inventory.numero_recibo === item.numero_recibo);
-        if (!result) {
-            receiptsWithoutInventory.push(item);
+
+    if (receiptsList.length > 0) {
+        const inventoryList = [];
+        let nextPage = null, hasMore = true;
+        while (hasMore) {
+            const responseInventory = await fetch(INVENTORY_REQUEST_URL, {
+                keepalive: true,
+                method: 'POST',
+                headers,
+                body: getInventoryList(receiptsList, nextPage)
+            });
+            const { results, next_cursor, has_more, status } = await responseInventory.json();
+            if (status === 429) {
+                console.error('Notion API rate limit exceeded!');
+                break;
+            }
+            if (results) {
+                inventoryList.push(...results.map(mapInventoryItem));
+            }
+            nextPage = next_cursor;
+            hasMore = has_more;
+        }
+
+        for (let index = 0; index < receipts.length; index++) {
+            const item = receipts[index];
+            const result = inventoryList.find(inventory => inventory.numero_recibo === item.numero_recibo);
+            if (!result) {
+                receiptsWithoutInventory.push(item);
+            }
         }
     }
+
     return receiptsWithoutInventory;
 }
 //#endregion
