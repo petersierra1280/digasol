@@ -67,7 +67,7 @@ const getComparisonItems = async () => {
             body: getComparisonList(nextPage)
         });
         const info = await responseComparison.json();
-        const { results, next_cursor, has_more, status } = info
+        const { results, next_cursor, has_more, status } = info;
         if (status === 429) {
             console.error('Notion API rate limit exceeded!');
             break;
