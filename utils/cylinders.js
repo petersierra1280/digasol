@@ -54,7 +54,7 @@ function mapCylinders(item, cameFrom) {
     const baseProps = {
         id,
         serial: properties["Serial"].title[0].plain_text
-    }
+    };
     switch (cameFrom) {
         case 'INVENTORY':
             baseProps.clase_gas = properties["Clase de gas"].select.name;

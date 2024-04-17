@@ -40,7 +40,7 @@ function mapReceipts(item) {
     return {
         id,
         numero_recibo: properties["Numero recibo"].unique_id.number
-    }
+    };
 };
 
 // Se filtran las siguientes props: ID y Numero recibo
