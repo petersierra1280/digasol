@@ -30,7 +30,7 @@ function mapInventoryItem(item) {
     return {
         id,
         numero_recibo: parseInt(properties["Numero recibo"].formula.string)
-    }
+    };
 };
 
 // Se filtran las siguientes props: Numero recibo
