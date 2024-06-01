@@ -1,0 +1,38 @@
+[
+  {
+    "codigo": "D000",
+    "nombre": "Digasol"
+  },
+  {
+    "codigo": "P003",
+    "nombre": "Digasol"
+  },
+  {
+    "codigo": "P005",
+    "nombre": "Digasol"
+  },
+  {
+    "codigo": "GLP",
+    "nombre": "Domicilios Cristobal"
+  },
+  {
+    "codigo": "GLP01",
+    "nombre": "Portagas"
+  },
+  {
+    "codigo": "P001",
+    "nombre": "AGA (Messer Colombia S.A.)"
+  },
+  {
+    "codigo": "P002",
+    "nombre": "Particular"
+  },
+  {
+    "codigo": "P004",
+    "nombre": "Gases de la Costa"
+  },
+  {
+    "codigo": "P006",
+    "nombre": "Gas Plus"
+  }
+]
