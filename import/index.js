@@ -2,10 +2,7 @@ const proveedores = require('./files/proveedores.json');
 const clientes = require('./files/clientes.json');
 const cilindros = require('./files/cilindros.json');
 
-const writeJsonFile = (file, jsonVariable) => {
-    const fs = require('node:fs');
-    fs.writeFileSync(`output/${file}.json`, JSON.stringify(jsonVariable));
-};
+const { writeJsonFile } = require('./utils');
 
 let cilindrosOutput = [];
 
