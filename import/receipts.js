@@ -8,18 +8,21 @@ let recibosOutput = [];
 
 cilindros.forEach(cilindro => {
     const {
-        localizacion,
         fechaentrada: fechaEntrada,
         fechasalida: fechaSalida,
         fechalimite: fechaRetorno,
         codigo: serial,
         estado
     } = cilindro;
+    let { localizacion } = cilindro;
 
     const cliente = clientes.find(cliente => cliente["nombre"].toUpperCase() === localizacion);
     const proveedor = proveedores.find(proveedor => proveedor["nombre"].toUpperCase() === localizacion);
 
     const tipoPrestamo = cliente ? "CLIENTE" : (proveedor ? "PROVEEDOR" : "N/A");
+    if (tipoPrestamo === 'PROVEEDOR' && localizacion === 'AGA') {
+        localizacion = 'AGA (Messer Colombia S.A.)';
+    }
 
     recibosOutput.push({
         prestado_a: localizacion,

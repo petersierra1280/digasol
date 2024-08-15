@@ -3,6 +3,9 @@ const writeJsonFile = (file, jsonVariable) => {
     fs.writeFileSync(`output/${file}.json`, JSON.stringify(jsonVariable));
 };
 
+const CLIENTE_PARTICULAR = 'C00000';
+
 module.exports = {
-    writeJsonFile
+    writeJsonFile,
+    CLIENTE_PARTICULAR
 };

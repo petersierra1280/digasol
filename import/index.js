@@ -2,7 +2,7 @@ const proveedores = require('./files/proveedores.json');
 const clientes = require('./files/clientes.json');
 const cilindros = require('./files/cilindros.json');
 
-const { writeJsonFile } = require('./utils');
+const { writeJsonFile, CLIENTE_PARTICULAR } = require('./utils');
 
 let cilindrosOutput = [];
 
@@ -42,7 +42,10 @@ cilindros.forEach(cilindro => {
     const codigoProveedor = cilindro["CodigoProveedor"];
     const esCliente = codigoProveedor.charAt(0) === "C";
     const origen = esCliente ? clientes : proveedores;
-    const propietarioCilindro = origen.find(item => item["codigo"] === codigoProveedor);
+    let propietarioCilindro = origen.find(item => item["codigo"] === codigoProveedor);
+    if (!propietarioCilindro) {
+        propietarioCilindro = clientes.find(cliente => cliente["codigo"] === CLIENTE_PARTICULAR);
+    }
     cilindro[esCliente ? "Cliente" : "Proveedor"] = propietarioCilindro["nombre"];
     //#endregion
 
