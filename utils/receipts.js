@@ -64,15 +64,15 @@ const createReceiptItem = (item, database_id) => {
 
     let title;
     switch (tipo_prestamo) {
-        case 'CLIENTE':
+        case tipoPrestamo.cliente:
             title = `Recibo prestamo - import - ${fecha_prestamo}`;
             break;
-        case 'PROVEEDOR':
+        case tipoPrestamo.proveedor:
             title = `Recibo recarga proveedor - import - ${fecha_prestamo}`;
     }
 
     let diferencia_dias = 0;
-    if (fecha_limite && tipo_prestamo === 'CLIENTE') {
+    if (fecha_limite && tipo_prestamo === tipoPrestamo.cliente) {
         diferencia_dias = daysBetween(new Date(fecha_prestamo), new Date(fecha_limite));
     }
 
@@ -109,9 +109,15 @@ const createReceiptItem = (item, database_id) => {
     }`;
 }
 
+const tipoPrestamo = {
+    cliente: 'CLIENTE',
+    proveedor: 'PROVEEDOR'
+}
+
 module.exports = {
     getBorrowedReceipts,
     mapReceipts,
     receiptsFilteredProps,
-    createReceiptItem
+    createReceiptItem,
+    tipoPrestamo
 }
