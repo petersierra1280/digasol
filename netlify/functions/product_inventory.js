@@ -14,7 +14,8 @@ const {
 const {
     getCylindersFromReceipt,
     mapCylinders,
-    cylindersInventoryFilteredProps
+    cylindersCameFrom,
+    cylinderProps,
 } = require('../../utils/cylinders');
 const {
     createInventoryItem
@@ -40,7 +41,7 @@ const getReceiptsWithoutInventory = async () => {
 //#region Obtener cilindros asociados al recibo
 const getReceiptsWithCylinders = async (receiptsWithoutInventory) => {
     return await Promise.all(receiptsWithoutInventory.map(async function (receipt) {
-        const CYLINDERS_FILTERED_PROPS = mapFilteredProps(cylindersInventoryFilteredProps);
+        const CYLINDERS_FILTERED_PROPS = mapFilteredProps(cylinderProps(cylindersCameFrom.inventory));
         const CYLINDERS_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_CYLINDERS}/query${CYLINDERS_FILTERED_PROPS}`
         const responseCylinders = await fetch(CYLINDERS_REQUEST_URL, {
             keepalive: true,
@@ -49,7 +50,7 @@ const getReceiptsWithCylinders = async (receiptsWithoutInventory) => {
             body: getCylindersFromReceipt(receipt.id)
         });
         const cylindersData = await responseCylinders.json();
-        receipt.cilindros = cylindersData.results.map(item => mapCylinders(item, 'INVENTORY'));
+        receipt.cilindros = cylindersData.results.map(item => mapCylinders(item, cylindersCameFrom.inventory));
         return receipt;
     }));
 }

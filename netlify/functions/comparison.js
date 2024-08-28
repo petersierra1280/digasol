@@ -13,7 +13,8 @@ const {
 const {
     getCylindersByProvider,
     mapCylinders,
-    cylindersComparisonFilteredProps
+    cylindersCameFrom,
+    cylinderProps,
 } = require('../../utils/cylinders');
 const {
     getComparisonList,
@@ -25,7 +26,7 @@ const {
 
 //#region Obtener cilindros del proveedor
 const getCylinders = async (providerName) => {
-    const CYLINDERS_FILTERED_PROPS = mapFilteredProps(cylindersComparisonFilteredProps);
+    const CYLINDERS_FILTERED_PROPS = mapFilteredProps(cylinderProps(cylindersCameFrom.comparison));
     const CYLINDERS_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_CYLINDERS}/query${CYLINDERS_FILTERED_PROPS}`;
 
     const cylinderItems = [];
@@ -43,7 +44,7 @@ const getCylinders = async (providerName) => {
             break;
         }
         if (results) {
-            cylinderItems.push(...results.map(item => mapCylinders(item, 'COMPARISON')));
+            cylinderItems.push(...results.map(item => mapCylinders(item, cylindersCameFrom.comparison)));
         }
         nextPage = next_cursor;
         hasMore = has_more;
