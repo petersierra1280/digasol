@@ -83,15 +83,9 @@ cilindros.forEach(async cilindro => {
         localizacion = 'AGA (Messer Colombia S.A.)';
     }
 
-    /*
-    Proceso de importacion de los recibos
-    1. Obtener informacion del cliente/proveedor -> ID de la pagina
-    2. Obtener informacion del cilindro asociado -> ID de de la pagina
-    3. Crear nueva pagina para el recibo de prestamo/recarga dependiendo del tipo
-    4. Actualizar el cilindro asociado -> Estado recargado
-    */
+    //#region Proceso de importacion de los recibos
 
-    //#region 1. Obtener cliente/proveedor
+    // 1. Obtener informacion del cliente/proveedor -> ID de la pagina
     let entityInfo, entityId;
     switch (tipoPrestamo) {
         case prestamos.cliente:
@@ -104,23 +98,16 @@ cilindros.forEach(async cilindro => {
     }
     entityId = entityInfo?.id;
 
-    //#endregion
-
-    //#region 2. Obtener cilindro asociado
-
+    // 2. Obtener informacion del cilindro asociado -> ID de de la pagina
     let cylinderId = (await getCylinderInformation(serial))?.id;
 
-    //#endregion 
-
-    //#region 3. Crear nuevo recibo
+    // 3. Crear nueva pagina para el recibo de prestamo/recarga dependiendo del tipo
 
     //TODO: createReceiptItem
 
-    //#endregion
+    // 4. Actualizar el cilindro asociado -> Estado recargado
 
-    //#region 4. Actualizar estado del cilindro
-
-    //TODO: Implement method
+    //TODO: implement method
 
     //#endregion
 
