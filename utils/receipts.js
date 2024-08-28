@@ -1,3 +1,5 @@
+const { daysBetween } = require('../utils/index');
+
 const getBorrowedReceipts = `{
     "filter": {
         "and": [
@@ -46,8 +48,70 @@ function mapReceipts(item) {
 // Se filtran las siguientes props: ID y Numero recibo
 const receiptsFilteredProps = ["YXYo"];
 
+const createReceiptItem = (item, database_id) => {
+    const {
+        tipo_prestamo,
+        fecha_prestamo,
+        fecha_limite = '',
+        cliente_id = '',
+        proveedor_id = '',
+        cilindros
+    } = item;
+
+    if (fecha_salida !== '') {
+        return '';
+    }
+
+    let title;
+    switch (tipo_prestamo) {
+        case 'CLIENTE':
+            title = `Recibo prestamo - import - ${fecha_prestamo}`;
+            break;
+        case 'PROVEEDOR':
+            title = `Recibo recarga proveedor - import - ${fecha_prestamo}`;
+    }
+
+    let diferencia_dias = 0;
+    if (fecha_limite && tipo_prestamo === 'CLIENTE') {
+        diferencia_dias = daysBetween(new Date(fecha_prestamo), new Date(fecha_limite));
+    }
+
+    return `{
+        "parent": { "database_id": "${database_id}" },
+        "properties": {
+            "Prestamo": {
+                "title": [
+                    {
+                        "text": {
+                            "content": "${title}"
+                        }
+                    }
+                ]
+            },
+            "Fecha prestamo": {
+                "date": {
+                    "start": ${fecha_prestamo}
+                }
+            },
+            ${cliente_id && `"Cliente": {
+                "relation": [{ "id": ${cliente_id} }]
+            },` }
+            ${proveedor_id && `"Proveedor": {
+                "relation": [{ "id": ${proveedor_id} }]
+            },` }
+            ${diferencia_dias > 0 && `"Dias retorno": {
+                "Number": ${diferencia_dias}
+            },` }
+            "Cilindros": {
+                "relation": [ ${cilindros.map(cilindro => `{ "id": ${cilindro} }`)} ]
+            }
+        }
+    }`;
+}
+
 module.exports = {
     getBorrowedReceipts,
     mapReceipts,
-    receiptsFilteredProps
+    receiptsFilteredProps,
+    createReceiptItem
 }
