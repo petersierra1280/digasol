@@ -62,6 +62,16 @@ const getCylindersBySerial = (serial) => `{
     }
 }`;
 
+const markCylinderAsRecharged = () => `{
+    "properties": {
+        "Recarga": {
+            "status": {
+                "name": "Recargado"
+            }
+        }
+    }
+}`;
+
 function mapCylinders(item, cameFrom) {
     const { properties, id } = item;
     const baseProps = {
@@ -107,6 +117,7 @@ module.exports = {
     getCylindersFromReceipt,
     getCylindersByProvider,
     getCylindersBySerial,
+    markCylinderAsRecharged,
     mapCylinders,
     cylinderProps,
     cylindersCameFrom

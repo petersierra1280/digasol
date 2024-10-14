@@ -73,6 +73,16 @@ const createReceipt = async (receiptItem) => {
     });
 }
 
+const rechargeCylinder = async (cylinderPageId) => {
+    const { markCylinderAsRecharged } = require('../utils/cylinders');
+    await fetch(`${NOTION_API_URL}/pages/${cylinderPageId}`, {
+        keepalive: true,
+        method: 'POST',
+        headers,
+        body: markCylinderAsRecharged()
+    });
+}
+
 //#endregion
 
 cilindros.forEach(async cilindro => {
@@ -109,7 +119,7 @@ cilindros.forEach(async cilindro => {
     entityId = entityInfo?.id;
 
     // 2. Obtener informacion del cilindro asociado -> ID de de la pagina
-    let cylinderId = (await getCylinderInformation(serial))?.id;
+    let cylinderPageId = (await getCylinderInformation(serial))?.id;
 
     // 3. Crear nueva pagina para el recibo de prestamo/recarga dependiendo del tipo
     const receiptItem = {
@@ -123,8 +133,7 @@ cilindros.forEach(async cilindro => {
     await createReceipt(receiptItem);
 
     // 4. Actualizar el cilindro asociado -> Estado recargado (siempre y cuando el prestamo este en progreso)
-
-    //TODO: implement method
+    await rechargeCylinder(cylinderPageId);
 
     //#endregion
 
