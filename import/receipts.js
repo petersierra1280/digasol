@@ -126,7 +126,7 @@ cilindros.forEach(async cilindro => {
         tipo_prestamo: tipoPrestamo,
         fecha_prestamo: fechaSalida, // TODO: Validar la fecha cuando el prestamo ya se ha finalizado
         fecha_limite: fechaRetorno, // TODO: Verificar los casos donde NO hay fecha retorno
-        cilindros: [{ serial }],
+        cilindros: [{ cylinderPageId }],
         confirmar_prestamo: true
     }
     receiptItem[tipoPrestamo === prestamos.cliente ? 'cliente_id' : 'proveedor_id'] = entityId;
