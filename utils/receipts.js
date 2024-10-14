@@ -55,7 +55,8 @@ const createReceiptItem = (item, database_id) => {
         fecha_limite = '',
         cliente_id = '',
         proveedor_id = '',
-        cilindros
+        cilindros,
+        confirmar_prestamo = false
     } = item;
 
     if (fecha_salida !== '') {
@@ -104,6 +105,9 @@ const createReceiptItem = (item, database_id) => {
             },` }
             "Cilindros": {
                 "relation": [ ${cilindros.map(cilindro => `{ "id": ${cilindro} }`)} ]
+            },
+            "Prestado a cliente": {
+                "checkbox": ${confirmar_prestamo}
             }
         }
     }`;
