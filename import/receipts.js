@@ -4,13 +4,14 @@ const cilindros = require('./files/cilindros_full.json');
 
 const { writeJsonFile } = require('./utils');
 const { mapFilteredProps, notionApiHeaders: headers } = require('../utils/index');
-const { createReceiptItem, tipoPrestamo: prestamos } = require('../utils/receipts');
+const { tipoPrestamo: prestamos } = require('../utils/receipts');
 
 const {
     NOTION_API_URL,
     NOTION_DATABASE_CLIENTS,
     NOTION_DATABASE_PROVIDERS,
-    NOTION_DATABASE_CYLINDERS
+    NOTION_DATABASE_CYLINDERS,
+    NOTION_DATABASE_RECEIPTS
 } = process.env;
 
 let recibosOutput = [];
@@ -31,7 +32,6 @@ const getClientInformation = async (clientName) => {
     const clientsData = await responseClient.json();
     return clientsData.results.map(mapClients)[0];
 }
-
 
 const getProviderInformation = async (providerName) => {
     const { providersFilteredProps, getProvidersByName, mapProviders, getProvidersByName } = require('../utils/providers');
@@ -61,6 +61,16 @@ const getCylinderInformation = async (serial) => {
     });
     const cylindersData = await responseCylinder.json();
     return cylindersData.results.map(item => mapCylinders(item, cylindersCameFrom.receipts))[0];
+}
+
+const createReceipt = async (receiptItem) => {
+    const { createReceiptItem } = require('../utils/receipts');
+    await fetch(`${NOTION_API_URL}/pages`, {
+        keepalive: true,
+        method: 'POST',
+        headers,
+        body: createReceiptItem(receiptItem, NOTION_DATABASE_RECEIPTS)
+    });
 }
 
 //#endregion
@@ -102,10 +112,16 @@ cilindros.forEach(async cilindro => {
     let cylinderId = (await getCylinderInformation(serial))?.id;
 
     // 3. Crear nueva pagina para el recibo de prestamo/recarga dependiendo del tipo
+    const receiptItem = {
+        tipo_prestamo: tipoPrestamo,
+        fecha_prestamo: fechaSalida, // TODO: Validar la fecha cuando el prestamo ya se ha finalizado
+        fecha_limite: fechaRetorno, // TODO: Verificar los casos donde NO hay fecha retorno
+        cilindros: [{ serial }]
+    }
+    receiptItem[tipoPrestamo === prestamos.cliente ? 'cliente_id' : 'proveedor_id'] = entityId;
+    await createReceipt(receiptItem);
 
-    //TODO: createReceiptItem
-
-    // 4. Actualizar el cilindro asociado -> Estado recargado
+    // 4. Actualizar el cilindro asociado -> Estado recargado (siempre y cuando el prestamo este en progreso)
 
     //TODO: implement method
 
@@ -122,4 +138,5 @@ cilindros.forEach(async cilindro => {
     });
 });
 
+// TODO: remove this implementation (no longer needed)
 writeJsonFile('recibos', recibosOutput);
