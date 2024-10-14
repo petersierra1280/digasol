@@ -7,5 +7,6 @@ node_modules
 ## Environment variables
 .env
 
-## Output files from import process
+## Input and output files from import process
+import/files/*.json
 import/output/*.json
