@@ -62,15 +62,24 @@ const getCylindersBySerial = (serial) => `{
     }
 }`;
 
-const markCylinderAsRecharged = () => `{
+const updateCylinderRechargeStatus = (rechargeStatus) => `{
     "properties": {
         "Recarga": {
             "status": {
-                "name": "Recargado"
+                "name": "${rechargeStatus}"
             }
         }
     }
 }`;
+
+const cylindersRechargeStatus = {
+    not_charged: "Por recargar",
+    in_progress: "En recarga proveedor",
+    charged: "Recargado"
+}
+
+const markCylinderAsRecharged = () => updateCylinderRechargeStatus(cylindersRechargeStatus.charged);
+const markCylinderAsNotRecharged = () => updateCylinderRechargeStatus(cylindersRechargeStatus.not_charged);
 
 function mapCylinders(item, cameFrom) {
     const { properties, id } = item;
@@ -86,7 +95,10 @@ function mapCylinders(item, cameFrom) {
         case cylindersCameFrom.comparison:
             const { type, date = {} } = properties["Recepcion proveedor"].formula;
             baseProps.recepcion_proveedor = type === 'date' ? date.start : '';
-            baseProps.detalles_devolucion = properties["Detalles devolucion proveedor"].formula.string
+            baseProps.detalles_devolucion = properties["Detalles devolucion proveedor"].formula.string;
+            break;
+        case cylindersCameFrom.receipts:
+            baseProps.proveedor = properties["Proveedor"].relation[0].id;
             break;
     }
     return baseProps;
@@ -109,7 +121,8 @@ const cylinderProps = (cameFrom) => {
             return ["aUM%5E", "title", "WLxn"];
 
         case cylindersCameFrom.receipts:
-            return ["title"];
+            // ID del Proveedor
+            return ["title", "OcWI"];
     }
 };
 
@@ -118,6 +131,7 @@ module.exports = {
     getCylindersByProvider,
     getCylindersBySerial,
     markCylinderAsRecharged,
+    markCylinderAsNotRecharged,
     mapCylinders,
     cylinderProps,
     cylindersCameFrom
