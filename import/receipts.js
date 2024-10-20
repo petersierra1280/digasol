@@ -2,7 +2,7 @@ const proveedores = require('./files/proveedores.json');
 const clientes = require('./files/clientes.json');
 const cilindros = require('./files/cilindros_full.json');
 
-const { writeJsonFile } = require('./utils');
+const { writeJsonFile, sleep, validateStringDate, receiptStatus, isCylinderInDigasol } = require('./utils');
 const { mapFilteredProps, notionApiHeaders: headers } = require('../utils/index');
 const { tipoPrestamo: prestamos } = require('../utils/receipts');
 
@@ -73,13 +73,13 @@ const createReceipt = async (receiptItem) => {
     });
 }
 
-const rechargeCylinder = async (cylinderPageId) => {
-    const { markCylinderAsRecharged } = require('../utils/cylinders');
+const updateCylinderStatus = async (cylinderPageId, recharged = true) => {
+    const { markCylinderAsRecharged, markCylinderAsNotRecharged } = require('../utils/cylinders');
     await fetch(`${NOTION_API_URL}/pages/${cylinderPageId}`, {
         keepalive: true,
         method: 'POST',
         headers,
-        body: markCylinderAsRecharged()
+        body: recharged ? markCylinderAsRecharged() : markCylinderAsNotRecharged()
     });
 }
 
@@ -119,21 +119,34 @@ cilindros.forEach(async cilindro => {
     entityId = entityInfo?.id;
 
     // 2. Obtener informacion del cilindro asociado -> ID de de la pagina
-    let cylinderPageId = (await getCylinderInformation(serial))?.id;
+    const cylinderInfo = await getCylinderInformation(serial);
+    let cylinderPageId = cylinderInfo?.id;
 
     // 3. Crear nueva pagina para el recibo de prestamo/recarga dependiendo del tipo
+    const cilindroEnDigasol = isCylinderInDigasol(localizacion);
+    const confirmarPrestamo = estado === receiptStatus.no_disponible && !cilindroEnDigasol; // Si el cilindro esta no en Digasol o no esta disponible, el prestamo esta activo
+    const fechaRecepcionProveedor = !confirmarPrestamo ? validateStringDate(fechaEntrada) : '';
     const receiptItem = {
         tipo_prestamo: tipoPrestamo,
-        fecha_prestamo: fechaSalida, // TODO: Validar la fecha cuando el prestamo ya se ha finalizado
-        fecha_limite: fechaRetorno, // TODO: Verificar los casos donde NO hay fecha retorno
+        fecha_prestamo: validateStringDate(fechaSalida),
+        fecha_limite: validateStringDate(fechaRetorno, false),
+        fecha_recepcion: fechaRecepcionProveedor,
         cilindros: [{ cylinderPageId }],
-        confirmar_prestamo: true
+        confirmar_prestamo: confirmarPrestamo,
+        cobrar_arriendo: false // TODO: Confirmar si se deben marcar como cobrar arriendo (a pesar de que los cilindros NO tienen valor por dia o por penalidad)
+    }
+    if (!confirmarPrestamo && cylinderInfo.proveedor) {
+        // Sobreescribe el ID del proveedor para referenciar la recepcion de un cilindro de parte del proveedor
+        entityInfo = cylinderInfo.proveedor;
     }
     receiptItem[tipoPrestamo === prestamos.cliente ? 'cliente_id' : 'proveedor_id'] = entityId;
     await createReceipt(receiptItem);
 
     // 4. Actualizar el cilindro asociado -> Estado recargado (siempre y cuando el prestamo este en progreso)
-    await rechargeCylinder(cylinderPageId);
+    await updateCylinderStatus(cylinderPageId, confirmarPrestamo);
+
+    // Avoid having issues with Notion API concurrency
+    await sleep(1000);
 
     //#endregion
 
