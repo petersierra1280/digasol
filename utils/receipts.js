@@ -1,3 +1,5 @@
+const { TZ = 'America/Bogota' } = process.env;
+
 const { daysBetween } = require('../utils/index');
 
 const getBorrowedReceipts = `{
@@ -56,7 +58,9 @@ const createReceiptItem = (item, database_id) => {
         cliente_id = '',
         proveedor_id = '',
         cilindros,
-        confirmar_prestamo = false
+        confirmar_prestamo = false,
+        fecha_recepcion,
+        cobrar_arriendo = false
     } = item;
 
     if (fecha_salida !== '') {
@@ -91,9 +95,15 @@ const createReceiptItem = (item, database_id) => {
             },
             "Fecha prestamo": {
                 "date": {
-                    "start": ${fecha_prestamo}
+                    "start": ${fecha_prestamo}, "time_zone": "${TZ}"
                 }
             },
+            ${fecha_recepcion && `"Fecha recepcion": {
+                "date": { "start": ${fecha_recepcion}, "time_zone": "${TZ}" }
+            },` }
+            ${cliente_id && `"Cobrar arriendo": {
+                 "status": { "name": "${cobrar_arriendo ? "Si" : "No"}" }
+            },` }
             ${cliente_id && `"Cliente": {
                 "relation": [{ "id": ${cliente_id} }]
             },` }
