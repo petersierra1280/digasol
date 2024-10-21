@@ -1,45 +1,49 @@
 const writeJsonFile = (file, jsonVariable) => {
-    const fs = require('node:fs');
-    fs.writeFileSync(`output/${file}.json`, JSON.stringify(jsonVariable));
+  const fs = require('node:fs');
+  fs.writeFileSync(`output/${file}.json`, JSON.stringify(jsonVariable));
 };
 
 function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 const getCurrentDate = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 const validateStringDate = (date, defaultValue = true) => {
-    return !date || (typeof date === 'string' && date.toLowerCase() === 'null') ? defaultValue ? getCurrentDate() : '' : date;
-}
+  return !date || (typeof date === 'string' && date.toLowerCase() === 'null')
+    ? defaultValue
+      ? getCurrentDate()
+      : ''
+    : date;
+};
 
 const CLIENTE_PARTICULAR = 'C00000';
 const DIGASOL = 'DIGASOL';
 
 const receiptStatus = {
-    disponible: 'DISPONIBLE',
-    no_disponible: 'NO_DISPONIBLE'
-}
+  disponible: 'DISPONIBLE',
+  no_disponible: 'NO_DISPONIBLE'
+};
 
 const isCylinderInDigasol = (localization) => {
-    if (!localization || typeof localization !== 'string') {
-        return false;
-    }
-    return localization.toLowerCase().includes(DIGASOL);
-}
+  if (!localization || typeof localization !== 'string') {
+    return false;
+  }
+  return localization.toLowerCase().includes(DIGASOL);
+};
 
 module.exports = {
-    writeJsonFile,
-    sleep,
-    getCurrentDate,
-    validateStringDate,
-    CLIENTE_PARTICULAR,
-    receiptStatus,
-    isCylinderInDigasol
+  writeJsonFile,
+  sleep,
+  getCurrentDate,
+  validateStringDate,
+  CLIENTE_PARTICULAR,
+  receiptStatus,
+  isCylinderInDigasol
 };

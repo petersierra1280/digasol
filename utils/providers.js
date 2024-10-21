@@ -1,5 +1,5 @@
 const getProvidersByName = (providerName) => {
-    return `{
+  return `{
         "filter": {
             "and": [
                 {
@@ -11,20 +11,20 @@ const getProvidersByName = (providerName) => {
             ]
         }
     }`;
-}
-
-function mapProviders(item) {
-    const { properties, id } = item;
-    return {
-        id,
-        nombres: properties["Nombres"].title[0].plain_text
-    };
 };
 
-const providersFilteredProps = ["title"];
+function mapProviders(item) {
+  const { properties, id } = item;
+  return {
+    id,
+    nombres: properties['Nombres'].title[0].plain_text
+  };
+}
+
+const providersFilteredProps = ['title'];
 
 module.exports = {
-    getProvidersByName,
-    mapProviders,
-    providersFilteredProps
-}
+  getProvidersByName,
+  mapProviders,
+  providersFilteredProps
+};
