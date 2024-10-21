@@ -63,7 +63,7 @@ const createReceiptItem = (item, database_id) => {
         cobrar_arriendo = false
     } = item;
 
-    if (fecha_salida !== '') {
+    if (fecha_prestamo !== '') {
         return '';
     }
 
