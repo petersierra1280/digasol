@@ -85,7 +85,7 @@ const getComparisonItems = async () => {
 
 //#region Comparar cilindros del proveedor vs Digasol
 const compareCylinders = async (comparisonItems, cylinders) => {
-    let foundCylinders = 0, notFoundCylinders = 0, cylindersWithDifferences = 0, cylindersEqual = 0; cylindersReturnedToProvider = 0;
+    let foundCylinders = 0, notFoundCylinders = 0, cylindersWithDifferences = 0, cylindersEqual = 0, cylindersReturnedToProvider = 0;
 
     if (comparisonItems && comparisonItems.length > 0) {
         await Promise.all(comparisonItems.map(async item => {
