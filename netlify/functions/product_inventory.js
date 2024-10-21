@@ -84,6 +84,7 @@ const createInventoryForReceipts = async (receipts) => {
 }
 //#endregion
 
+// eslint-disable-next-line no-unused-vars
 exports.handler = async event => {
     try {
         const receiptsWithoutInventory = await getReceiptsWithoutInventory();
