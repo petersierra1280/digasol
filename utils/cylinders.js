@@ -92,11 +92,12 @@ function mapCylinders(item, cameFrom) {
             baseProps.clase_gas = properties["Clase de gas"].select.name;
             baseProps.cantidad_producto = properties["Cantidad producto"].formula.number;
             break;
-        case cylindersCameFrom.comparison:
+        case cylindersCameFrom.comparison: {
             const { type, date = {} } = properties["Recepcion proveedor"].formula;
             baseProps.recepcion_proveedor = type === 'date' ? date.start : '';
             baseProps.detalles_devolucion = properties["Detalles devolucion proveedor"].formula.string;
             break;
+        }
         case cylindersCameFrom.receipts:
             baseProps.proveedor = properties["Proveedor"].relation[0].id;
             break;
