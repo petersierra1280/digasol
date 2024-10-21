@@ -21,10 +21,10 @@ function mapProviders(item) {
     };
 };
 
-const clientsFilteredProps = ["title"];
+const providersFilteredProps = ["title"];
 
 module.exports = {
     getProvidersByName,
     mapProviders,
-    clientsFilteredProps
+    providersFilteredProps
 }

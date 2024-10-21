@@ -34,7 +34,7 @@ const getClientInformation = async (clientName) => {
 }
 
 const getProviderInformation = async (providerName) => {
-    const { providersFilteredProps, getProvidersByName, mapProviders, getProvidersByName } = require('../utils/providers');
+    const { providersFilteredProps, getProvidersByName, mapProviders } = require('../utils/providers');
     const PROVIDERS_FILTERED_PROPS = mapFilteredProps(providersFilteredProps);
     const PROVIDERS_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_PROVIDERS}/query${PROVIDERS_FILTERED_PROPS}`;
 
