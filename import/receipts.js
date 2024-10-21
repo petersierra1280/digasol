@@ -14,7 +14,7 @@ const {
     NOTION_DATABASE_RECEIPTS
 } = process.env;
 
-let recibosOutput = [];
+let recibosErrorOutput = [];
 
 //#region Funciones para aplicar operaciones con las diferentes entidades en Notion
 
@@ -102,64 +102,71 @@ cilindros.forEach(async cilindro => {
     if (tipoPrestamo === prestamos.proveedor && localizacion === 'AGA') {
         localizacion = 'AGA (Messer Colombia S.A.)';
     }
+    try {
+        //#region Proceso de importacion de los recibos
 
-    //#region Proceso de importacion de los recibos
+        // 1. Obtener informacion del cliente/proveedor -> ID de la pagina
+        let entityInfo, entityId;
+        switch (tipoPrestamo) {
+            case prestamos.cliente:
+                entityInfo = await getClientInformation(localizacion);
+                break;
 
-    // 1. Obtener informacion del cliente/proveedor -> ID de la pagina
-    let entityInfo, entityId;
-    switch (tipoPrestamo) {
-        case prestamos.cliente:
-            entityInfo = await getClientInformation(localizacion);
-            break;
+            case prestamos.proveedor:
+                entityInfo = await getProviderInformation(localizacion);
+                break;
+        }
+        entityId = entityInfo?.id;
 
-        case prestamos.proveedor:
-            entityInfo = await getProviderInformation(localizacion);
-            break;
+        // 2. Obtener informacion del cilindro asociado -> ID de de la pagina
+        const cylinderInfo = await getCylinderInformation(serial);
+        let cylinderPageId = cylinderInfo?.id;
+
+        // 3. Crear nueva pagina para el recibo de prestamo/recarga dependiendo del tipo
+        const cilindroEnDigasol = isCylinderInDigasol(localizacion);
+        const confirmarPrestamo = estado === receiptStatus.no_disponible && !cilindroEnDigasol; // Si el cilindro esta no en Digasol o no esta disponible, el prestamo esta activo
+        const fechaRecepcionProveedor = !confirmarPrestamo ? validateStringDate(fechaEntrada) : '';
+        const receiptItem = {
+            tipo_prestamo: tipoPrestamo,
+            fecha_prestamo: validateStringDate(fechaSalida),
+            fecha_limite: validateStringDate(fechaRetorno, false),
+            fecha_recepcion: fechaRecepcionProveedor,
+            cilindros: [{ cylinderPageId }],
+            confirmar_prestamo: confirmarPrestamo,
+            cobrar_arriendo: false // No se marcaran para cobrar arriendo, ya que ningun cilindro tiene el valor por dia configurado
+        }
+        if (!confirmarPrestamo && cylinderInfo.proveedor) {
+            // Sobreescribe el ID del proveedor para referenciar la recepcion de un cilindro de parte del proveedor
+            entityInfo = cylinderInfo.proveedor;
+        }
+        receiptItem[tipoPrestamo === prestamos.cliente ? 'cliente_id' : 'proveedor_id'] = entityId;
+        await createReceipt(receiptItem);
+
+        // 4. Actualizar el cilindro asociado -> Estado recargado (siempre y cuando el prestamo este en progreso)
+        await updateCylinderStatus(cylinderPageId, confirmarPrestamo);
+
+        // Avoid having issues with Notion API concurrency
+        await sleep(1000);
+
+        //#endregion
+    } catch (error) {
+        const { message, stack } = error;
+        recibosErrorOutput.push({
+            prestado_a: localizacion,
+            tipo_prestamo: tipoPrestamo,
+            fecha_entrada: fechaEntrada,
+            fecha_salida: fechaSalida,
+            fecha_retorno: fechaRetorno,
+            cilindro: serial,
+            estado,
+            error: {
+                message,
+                stack
+            }
+        });
     }
-    entityId = entityInfo?.id;
-
-    // 2. Obtener informacion del cilindro asociado -> ID de de la pagina
-    const cylinderInfo = await getCylinderInformation(serial);
-    let cylinderPageId = cylinderInfo?.id;
-
-    // 3. Crear nueva pagina para el recibo de prestamo/recarga dependiendo del tipo
-    const cilindroEnDigasol = isCylinderInDigasol(localizacion);
-    const confirmarPrestamo = estado === receiptStatus.no_disponible && !cilindroEnDigasol; // Si el cilindro esta no en Digasol o no esta disponible, el prestamo esta activo
-    const fechaRecepcionProveedor = !confirmarPrestamo ? validateStringDate(fechaEntrada) : '';
-    const receiptItem = {
-        tipo_prestamo: tipoPrestamo,
-        fecha_prestamo: validateStringDate(fechaSalida),
-        fecha_limite: validateStringDate(fechaRetorno, false),
-        fecha_recepcion: fechaRecepcionProveedor,
-        cilindros: [{ cylinderPageId }],
-        confirmar_prestamo: confirmarPrestamo,
-        cobrar_arriendo: false // TODO: Confirmar si se deben marcar como cobrar arriendo (a pesar de que los cilindros NO tienen valor por dia o por penalidad)
-    }
-    if (!confirmarPrestamo && cylinderInfo.proveedor) {
-        // Sobreescribe el ID del proveedor para referenciar la recepcion de un cilindro de parte del proveedor
-        entityInfo = cylinderInfo.proveedor;
-    }
-    receiptItem[tipoPrestamo === prestamos.cliente ? 'cliente_id' : 'proveedor_id'] = entityId;
-    await createReceipt(receiptItem);
-
-    // 4. Actualizar el cilindro asociado -> Estado recargado (siempre y cuando el prestamo este en progreso)
-    await updateCylinderStatus(cylinderPageId, confirmarPrestamo);
-
-    // Avoid having issues with Notion API concurrency
-    await sleep(1000);
-
-    //#endregion
-
-    recibosOutput.push({
-        prestado_a: localizacion,
-        tipo_prestamo: tipoPrestamo,
-        fecha_entrada: fechaEntrada,
-        fecha_salida: fechaSalida,
-        fecha_retorno: fechaRetorno,
-        cilindro: serial.toString(),
-        estado
-    });
 });
 
-// TODO: remove this implementation (no longer needed)
-writeJsonFile('recibos', recibosOutput);
+if (recibosErrorOutput.length > 0) {
+    writeJsonFile('recibos_errored', recibosErrorOutput);
+}
