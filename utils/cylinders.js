@@ -28,8 +28,7 @@ const getCylindersFromReceipt = (receiptId) => `{
 }`;
 
 const getCylindersByProvider = (providerName, cursorId) => {
-    let query =
-        `"filter": {
+  let query = `"filter": {
                 "and": [
                     {
                         "property": "Nombre proveedor comparar",
@@ -43,41 +42,98 @@ const getCylindersByProvider = (providerName, cursorId) => {
                     }
                 ]
             }`;
-    if (cursorId) {
-        query += `, "start_cursor": "${cursorId}"`;
-    }
-    return `{ ${query} }`;
+  if (cursorId) {
+    query += `, "start_cursor": "${cursorId}"`;
+  }
+  return `{ ${query} }`;
 };
+
+const getCylindersBySerial = (serial) => `{
+    "filter": {
+        "and": [
+            {
+                "property": "Serial",
+                "rich_text": {
+                    "equals": "${serial}"
+                }
+            }
+        ]
+    }
+}`;
+
+const updateCylinderRechargeStatus = (rechargeStatus) => `{
+    "properties": {
+        "Recarga": {
+            "status": {
+                "name": "${rechargeStatus}"
+            }
+        }
+    }
+}`;
+
+const cylindersRechargeStatus = {
+  not_charged: 'Por recargar',
+  in_progress: 'En recarga proveedor',
+  charged: 'Recargado'
+};
+
+const markCylinderAsRecharged = () => updateCylinderRechargeStatus(cylindersRechargeStatus.charged);
+const markCylinderAsNotRecharged = () =>
+  updateCylinderRechargeStatus(cylindersRechargeStatus.not_charged);
 
 function mapCylinders(item, cameFrom) {
-    const { properties, id } = item;
-    const baseProps = {
-        id,
-        serial: properties["Serial"].title[0].plain_text
-    };
-    switch (cameFrom) {
-        case 'INVENTORY':
-            baseProps.clase_gas = properties["Clase de gas"].select.name;
-            baseProps.cantidad_producto = properties["Cantidad producto"].formula.number;
-            break;
-        case 'COMPARISON':
-            const { type, date = {} } = properties["Recepcion proveedor"].formula;
-            baseProps.recepcion_proveedor = type === 'date' ? date.start : '';
-            baseProps.detalles_devolucion = properties["Detalles devolucion proveedor"].formula.string
-            break;
+  const { properties, id } = item;
+  const baseProps = {
+    id,
+    serial: properties['Serial'].title[0].plain_text
+  };
+  switch (cameFrom) {
+    case cylindersCameFrom.inventory:
+      baseProps.clase_gas = properties['Clase de gas'].select.name;
+      baseProps.cantidad_producto = properties['Cantidad producto'].formula.number;
+      break;
+    case cylindersCameFrom.comparison: {
+      const { type, date = {} } = properties['Recepcion proveedor'].formula;
+      baseProps.recepcion_proveedor = type === 'date' ? date.start : '';
+      baseProps.detalles_devolucion = properties['Detalles devolucion proveedor'].formula.string;
+      break;
     }
-    return baseProps;
+    case cylindersCameFrom.receipts:
+      baseProps.proveedor = properties['Proveedor'].relation[0].id;
+      break;
+  }
+  return baseProps;
+}
+
+const cylindersCameFrom = {
+  inventory: 'INVENTORY',
+  comparison: 'COMPARISON',
+  receipts: 'RECEIPTS'
 };
 
-// Se filtran las siguientes props: Clase de gas, cantidad producto
-const cylindersInventoryFilteredProps = ["nwIs", "mGna", "title"];
-// Recepcion proveedor y Detalles devolucion proveedor
-const cylindersComparisonFilteredProps = ["aUM%5E", "title", "WLxn"];
+const cylinderProps = (cameFrom) => {
+  switch (cameFrom) {
+    case cylindersCameFrom.inventory:
+      // Clase de gas, cantidad producto
+      return ['nwIs', 'mGna', 'title'];
+
+    case cylindersCameFrom.comparison:
+      // Recepcion proveedor y Detalles devolucion proveedor
+      return ['aUM%5E', 'title', 'WLxn'];
+
+    case cylindersCameFrom.receipts:
+      // ID del Proveedor
+      return ['title', 'OcWI'];
+  }
+};
 
 module.exports = {
-    getCylindersFromReceipt,
-    getCylindersByProvider,
-    mapCylinders,
-    cylindersInventoryFilteredProps,
-    cylindersComparisonFilteredProps
-}
+  getCylindersFromReceipt,
+  getCylindersByProvider,
+  getCylindersBySerial,
+  markCylinderAsRecharged,
+  markCylinderAsNotRecharged,
+  mapCylinders,
+  cylinderProps,
+  cylindersCameFrom
+};
