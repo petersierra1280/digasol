@@ -6,8 +6,9 @@ const {
   writeJsonFile,
   sleep,
   validateStringDate,
+  isCylinderInDigasol,
   receiptStatus,
-  isCylinderInDigasol
+  SLEEP_TIMEOUT
 } = require('./utils');
 const { mapFilteredProps, notionApiHeaders: headers } = require('../utils/index');
 const { tipoPrestamo: prestamos } = require('../utils/receipts');
@@ -100,7 +101,9 @@ const updateCylinderStatus = async (cylinderPageId, recharged = true) => {
 
 //#endregion
 
-cilindros.forEach(async (cilindro) => {
+console.log(`${cilindros.length} total de cilindros en contrados por procesar...`);
+
+cilindros.forEach(async (cilindro, index) => {
   const {
     fechaentrada: fechaEntrada,
     fechasalida: fechaSalida,
@@ -109,6 +112,8 @@ cilindros.forEach(async (cilindro) => {
     estado
   } = cilindro;
   let { localizacion } = cilindro;
+
+  console.log(`${index}) Procesando cilindro: ${serial}`);
 
   const cliente = clientes.find((cliente) => cliente['nombre'].toUpperCase() === localizacion);
   const proveedor = proveedores.find(
@@ -159,11 +164,17 @@ cilindros.forEach(async (cilindro) => {
     receiptItem[tipoPrestamo === prestamos.cliente ? 'cliente_id' : 'proveedor_id'] = entityId;
     await createReceipt(receiptItem);
 
+    console.log(`Recibo creado para el cilindro ${serial}`);
+
     // 4. Actualizar el cilindro asociado -> Estado recargado (siempre y cuando el prestamo este en progreso)
     await updateCylinderStatus(cylinderPageId, confirmarPrestamo);
 
-    // Avoid having issues with Notion API concurrency
-    await sleep(1000);
+    console.log(`Actualizado estado del cilindro | pagina ${cylinderPageId}`);
+
+    // Evitar problemas con el max rate del API de Notion
+    await sleep(SLEEP_TIMEOUT);
+
+    console.log('-----------');
 
     //#endregion
   } catch (error) {
@@ -181,6 +192,7 @@ cilindros.forEach(async (cilindro) => {
         stack
       }
     });
+    console.error(`Error procesando cilindro ${serial}: ${message}`);
   }
 });
 
