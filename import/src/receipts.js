@@ -10,8 +10,8 @@ const {
   receiptStatus,
   SLEEP_TIMEOUT
 } = require('./utils');
-const { mapFilteredProps, notionApiHeaders: headers } = require('../utils/index');
-const { tipoPrestamo: prestamos } = require('../utils/receipts');
+const { mapFilteredProps, notionApiHeaders: headers } = require('../../utils/index');
+const { tipoPrestamo: prestamos } = require('../../utils/receipts');
 
 const {
   NOTION_API_URL,
@@ -44,7 +44,7 @@ const importProcess = () => {
   //#region Funciones para aplicar operaciones con las diferentes entidades en Notion
 
   const getClientInformation = async (clientName) => {
-    const { clientsFilteredProps, getClientsByName, mapClients } = require('../utils/clients');
+    const { clientsFilteredProps, getClientsByName, mapClients } = require('../../utils/clients');
     const CLIENTS_FILTERED_PROPS = mapFilteredProps(clientsFilteredProps);
     const CLIENTS_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_CLIENTS}/query${CLIENTS_FILTERED_PROPS}`;
 
@@ -63,7 +63,7 @@ const importProcess = () => {
       providersFilteredProps,
       getProvidersByName,
       mapProviders
-    } = require('../utils/providers');
+    } = require('../../utils/providers');
     const PROVIDERS_FILTERED_PROPS = mapFilteredProps(providersFilteredProps);
     const PROVIDERS_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_PROVIDERS}/query${PROVIDERS_FILTERED_PROPS}`;
 
@@ -83,7 +83,7 @@ const importProcess = () => {
       getCylindersBySerial,
       mapCylinders,
       cylindersCameFrom
-    } = require('../utils/cylinders');
+    } = require('../../utils/cylinders');
     const CYLINDERS_FILTERED_PROPS = mapFilteredProps(cylinderProps(cylindersCameFrom.receipts));
     const CYLINDERS_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_CYLINDERS}/query${CYLINDERS_FILTERED_PROPS}`;
 
@@ -98,7 +98,7 @@ const importProcess = () => {
   };
 
   const createReceipt = async (receiptItem) => {
-    const { createReceiptItem } = require('../utils/receipts');
+    const { createReceiptItem } = require('../../utils/receipts');
     await fetch(`${NOTION_API_URL}/pages`, {
       keepalive: true,
       method: 'POST',
@@ -108,7 +108,7 @@ const importProcess = () => {
   };
 
   const updateCylinderStatus = async (cylinderPageId, recharged = true) => {
-    const { markCylinderAsRecharged, markCylinderAsNotRecharged } = require('../utils/cylinders');
+    const { markCylinderAsRecharged, markCylinderAsNotRecharged } = require('../../utils/cylinders');
     await fetch(`${NOTION_API_URL}/pages/${cylinderPageId}`, {
       keepalive: true,
       method: 'POST',

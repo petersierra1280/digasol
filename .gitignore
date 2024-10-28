@@ -8,5 +8,5 @@ node_modules
 .env
 
 ## Input and output files from import process
-import/files/*.json
-import/output/*.json
+import/src/files/*.json
+import/src/output/*.json
