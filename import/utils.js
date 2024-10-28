@@ -25,6 +25,7 @@ const validateStringDate = (date, defaultValue = true) => {
 
 const CLIENTE_PARTICULAR = 'C00000';
 const DIGASOL = 'DIGASOL';
+const SLEEP_TIMEOUT = 1000;
 
 const receiptStatus = {
   disponible: 'DISPONIBLE',
@@ -43,7 +44,8 @@ module.exports = {
   sleep,
   getCurrentDate,
   validateStringDate,
+  isCylinderInDigasol,
   CLIENTE_PARTICULAR,
   receiptStatus,
-  isCylinderInDigasol
+  SLEEP_TIMEOUT
 };
