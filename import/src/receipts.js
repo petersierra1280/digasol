@@ -7,8 +7,7 @@ const {
   sleep,
   validateStringDate,
   isCylinderInDigasol,
-  receiptStatus,
-  SLEEP_TIMEOUT
+  receiptStatus
 } = require('./utils');
 const { mapFilteredProps, notionApiHeaders: headers } = require('../../utils/index');
 const { tipoPrestamo: prestamos } = require('../../utils/receipts');
@@ -108,7 +107,10 @@ const importProcess = () => {
   };
 
   const updateCylinderStatus = async (cylinderPageId, recharged = true) => {
-    const { markCylinderAsRecharged, markCylinderAsNotRecharged } = require('../../utils/cylinders');
+    const {
+      markCylinderAsRecharged,
+      markCylinderAsNotRecharged
+    } = require('../../utils/cylinders');
     await fetch(`${NOTION_API_URL}/pages/${cylinderPageId}`, {
       keepalive: true,
       method: 'POST',
@@ -190,7 +192,7 @@ const importProcess = () => {
       console.log(`Actualizado estado del cilindro | pagina ${cylinderPageId}`);
 
       // Evitar problemas con el max rate del API de Notion
-      await sleep(SLEEP_TIMEOUT);
+      await sleep();
 
       console.log('-----------');
 

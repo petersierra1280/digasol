@@ -3,8 +3,8 @@ const writeJsonFile = (file, jsonVariable) => {
   fs.writeFileSync(`output/${file}.json`, JSON.stringify(jsonVariable));
 };
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function sleep() {
+  return new Promise((resolve) => setTimeout(resolve, SLEEP_TIMEOUT));
 }
 
 const getCurrentDate = () => {
@@ -46,6 +46,5 @@ module.exports = {
   validateStringDate,
   isCylinderInDigasol,
   CLIENTE_PARTICULAR,
-  receiptStatus,
-  SLEEP_TIMEOUT
+  receiptStatus
 };
