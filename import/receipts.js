@@ -38,7 +38,7 @@ switch (executeMode) {
     break;
 }
 
-const importProcess = async () => {
+const importProcess = () => {
   let recibosErrorOutput = [];
 
   //#region Funciones para aplicar operaciones con las diferentes entidades en Notion
