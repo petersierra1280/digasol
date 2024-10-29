@@ -3,8 +3,8 @@ const writeJsonFile = (file, jsonVariable) => {
   fs.writeFileSync(`output/${file}.json`, JSON.stringify(jsonVariable));
 };
 
-function sleep() {
-  return new Promise((resolve) => setTimeout(resolve, SLEEP_TIMEOUT));
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms || SLEEP_TIMEOUT.default));
 }
 
 const getCurrentDate = () => {
@@ -25,7 +25,10 @@ const validateStringDate = (date, defaultValue = true) => {
 
 const CLIENTE_PARTICULAR = 'C00000';
 const DIGASOL = 'DIGASOL';
-const SLEEP_TIMEOUT = 1000;
+const SLEEP_TIMEOUT = {
+  default: 500,
+  rate_limit: 60000
+};
 
 const receiptStatus = {
   disponible: 'DISPONIBLE',
@@ -46,5 +49,6 @@ module.exports = {
   validateStringDate,
   isCylinderInDigasol,
   CLIENTE_PARTICULAR,
+  SLEEP_TIMEOUT,
   receiptStatus
 };
