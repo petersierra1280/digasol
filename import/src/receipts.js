@@ -237,9 +237,13 @@ const {
     };
 
     const deletePage = async (pageId) => {
+      console.log(`Deleting page ${pageId}`);
       const response = await fetch(`${NOTION_API_URL}/pages/${pageId}`, {
-        method: 'DELETE',
-        headers
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({
+          archived: true
+        })
       });
 
       if (response.status === RATE_LIMIT_CODE) {
