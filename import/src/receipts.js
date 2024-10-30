@@ -21,7 +21,7 @@ const {
   NOTION_DATABASE_RECEIPTS
 } = process.env;
 
-async () => {
+(async () => {
   const args = process.argv.slice(2);
   const executeMode = args[0] || 'import';
 
@@ -123,7 +123,7 @@ async () => {
 
     //#endregion
 
-    console.log(`${cilindros.length} total de cilindros en contrados por procesar...`);
+    console.log(`${cilindros.length} total de cilindros encontrados por procesar...`);
 
     cilindros.forEach(async (cilindro, index) => {
       const {
@@ -292,4 +292,4 @@ async () => {
 
     await deleteAllPages();
   };
-};
+})();
