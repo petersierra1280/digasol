@@ -17,7 +17,7 @@ function mapProviders(item) {
   const { properties, id } = item;
   return {
     id,
-    nombres: properties['Nombres'].title[0].plain_text
+    nombres: properties['Nombre'].title[0].plain_text
   };
 }
 
