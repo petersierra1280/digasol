@@ -24,7 +24,7 @@ const {
 } = process.env;
 
 (async () => {
-  const importProcess = () => {
+  const importProcess = async () => {
     let recibosErrorOutput = [];
 
     //#region Funciones para aplicar operaciones con las diferentes entidades en Notion
@@ -109,8 +109,9 @@ const {
     //#endregion
 
     console.log(`${cilindros.length} total de cilindros encontrados por procesar...`);
+    let index = 1;
 
-    cilindros.forEach(async (cilindro, index) => {
+    for (const cilindro of cilindros) {
       const {
         fechaentrada: fechaEntrada,
         fechasalida: fechaSalida,
@@ -168,6 +169,7 @@ const {
           // Sobreescribe el ID del proveedor para referenciar la recepcion de un cilindro de parte del proveedor
           entityInfo = cylinderInfo.proveedor;
         }
+
         receiptItem[tipoPrestamo === prestamos.cliente ? 'cliente_id' : 'proveedor_id'] = entityId;
         await createReceipt(receiptItem);
 
@@ -199,9 +201,10 @@ const {
             stack
           }
         });
-        console.error(`Error procesando cilindro ${serial}: ${message}`);
+        console.error(`Error procesando cilindro ${serial}: ${message} | ${stack}`);
       }
-    });
+      index++;
+    }
 
     if (recibosErrorOutput.length > 0) {
       writeJsonFile('recibos_errored', recibosErrorOutput);
@@ -287,7 +290,7 @@ const {
 
   switch (executeMode) {
     case 'import':
-      importProcess();
+      await importProcess();
       break;
 
     case 'remove':
