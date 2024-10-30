@@ -1,3 +1,5 @@
+require('dotenv').config({ path: `../../.env` });
+
 const proveedores = require('./files/proveedores.json');
 const clientes = require('./files/clientes.json');
 const cilindros = require('./files/cilindros_full.json');
@@ -22,23 +24,6 @@ const {
 } = process.env;
 
 (async () => {
-  const args = process.argv.slice(2);
-  const executeMode = args[0] || 'import';
-
-  switch (executeMode) {
-    case 'import':
-      importProcess();
-      break;
-
-    case 'remove':
-      await deleteAllReceipts();
-      break;
-
-    default:
-      console.warn('No se recibio el parametro que indica el modo de ejecucion');
-      break;
-  }
-
   const importProcess = () => {
     let recibosErrorOutput = [];
 
@@ -292,4 +277,21 @@ const {
 
     await deleteAllPages();
   };
+
+  const args = process.argv.slice(2);
+  const executeMode = args[0] || 'import';
+
+  switch (executeMode) {
+    case 'import':
+      importProcess();
+      break;
+
+    case 'remove':
+      await deleteAllReceipts();
+      break;
+
+    default:
+      console.warn('No se recibio el parametro que indica el modo de ejecucion');
+      break;
+  }
 })();
