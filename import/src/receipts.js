@@ -24,6 +24,8 @@ const {
 } = process.env;
 
 (async () => {
+  const separador = '-----------';
+
   const importProcess = async () => {
     let recibosErrorOutput = [];
 
@@ -85,12 +87,23 @@ const {
 
     const createReceipt = async (receiptItem) => {
       const { createReceiptItem } = require('../../utils/receipts');
-      await fetch(`${NOTION_API_URL}/pages`, {
+      const body = createReceiptItem(receiptItem, NOTION_DATABASE_RECEIPTS);
+      if (!body) {
+        console.warn('No se obtuvo informacion del recibo a crear. Omitiendo registro...');
+      }
+      const result = await fetch(`${NOTION_API_URL}/pages`, {
         keepalive: true,
         method: 'POST',
         headers,
-        body: createReceiptItem(receiptItem, NOTION_DATABASE_RECEIPTS)
+        body
       });
+      if (!result.ok) {
+        console.error('Error creando recibo. Response: ', result.status, result.statusText);
+        const errorBody = await result.text();
+        console.error('Response body: ', errorBody);
+      } else {
+        console.log('Recibo creado exitosamente');
+      }
     };
 
     const updateCylinderStatus = async (cylinderPageId, recharged = true) => {
@@ -98,12 +111,23 @@ const {
         markCylinderAsRecharged,
         markCylinderAsNotRecharged
       } = require('../../utils/cylinders');
-      await fetch(`${NOTION_API_URL}/pages/${cylinderPageId}`, {
+      const result = await fetch(`${NOTION_API_URL}/pages/${cylinderPageId}`, {
         keepalive: true,
-        method: 'POST',
+        method: 'PATCH',
         headers,
         body: recharged ? markCylinderAsRecharged() : markCylinderAsNotRecharged()
       });
+      if (!result.ok) {
+        console.error(
+          'Error actualizando el estado del cilindro. Response: ',
+          result.status,
+          result.statusText
+        );
+        const errorBody = await result.text();
+        console.error('Response body: ', errorBody);
+      } else {
+        console.log('Estado del cilindro actualizado exitosamente');
+      }
     };
 
     //#endregion
@@ -161,7 +185,7 @@ const {
           fecha_prestamo: validateStringDate(fechaSalida),
           fecha_limite: validateStringDate(fechaRetorno, false),
           fecha_recepcion: fechaRecepcionProveedor,
-          cilindros: [{ cylinderPageId }],
+          cilindros: [cylinderPageId],
           confirmar_prestamo: confirmarPrestamo,
           cobrar_arriendo: false // No se marcaran para cobrar arriendo, ya que ningun cilindro tiene el valor por dia configurado
         };
@@ -169,21 +193,17 @@ const {
           // Sobreescribe el ID del proveedor para referenciar la recepcion de un cilindro de parte del proveedor
           entityInfo = cylinderInfo.proveedor;
         }
-
         receiptItem[tipoPrestamo === prestamos.cliente ? 'cliente_id' : 'proveedor_id'] = entityId;
-        await createReceipt(receiptItem);
 
-        console.log(`Recibo creado para el cilindro ${serial}`);
+        await createReceipt(receiptItem);
 
         // 4. Actualizar el cilindro asociado -> Estado recargado (siempre y cuando el prestamo este en progreso)
         await updateCylinderStatus(cylinderPageId, confirmarPrestamo);
 
-        console.log(`Actualizado estado del cilindro | pagina ${cylinderPageId}`);
-
         // Evitar problemas con el max rate del API de Notion
         await sleep();
 
-        console.log('-----------');
+        console.log(separador);
 
         //#endregion
       } catch (error) {
@@ -272,6 +292,7 @@ const {
           } else {
             console.error(`Failed to delete receipt page: ${receiptPageId}`);
           }
+          console.log(separador);
           await sleep();
         }
 
