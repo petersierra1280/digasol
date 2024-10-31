@@ -134,6 +134,7 @@ const {
 
     console.log(`${cilindros.length} total de cilindros encontrados por procesar...`);
     let index = 1;
+    const startTime = Date.now();
 
     for (const cilindro of cilindros) {
       const {
@@ -226,7 +227,13 @@ const {
       index++;
     }
 
+    const endTime = Date.now();
+    const durationInMs = endTime - startTime;
+    const durationInMinutes = (durationInMs / (1000 * 60)).toFixed(2);
+    console.log(`Proceso de importacion tomo ${durationInMinutes} mins`);
+
     if (recibosErrorOutput.length > 0) {
+      console.error(`Se produjeron ${recibosErrorOutput.length} errores durante la ejecucion.`);
       writeJsonFile('recibos_errored', recibosErrorOutput);
     }
   };
@@ -308,6 +315,17 @@ const {
 
   const args = process.argv.slice(2);
   const executeMode = args[0] || 'import';
+
+  /*
+   * TODO:
+   * 1.  Finish testing import records
+   * 2.  When removing receipts...
+   * 2.1 Restore cylinder status to "pending for recharge" when removing receipts
+   * 2.2 Delete product inventory records related with the receipt at the moment of being removed
+   * 3.  Ability to resume if the process is interrupted (validate if a cylinder is already associated with a receipt)
+   * 4.  Update cylinders pressure at the moment of updating the recharge status (look at the index.js logic)
+   * 5.  Save a local cache of clients and providers coming from the Notion API
+   */
 
   switch (executeMode) {
     case 'import':
