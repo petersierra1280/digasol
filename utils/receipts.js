@@ -1,6 +1,6 @@
 const { TZ = 'America/Bogota' } = process.env;
 
-const { daysBetween } = require('../utils/index');
+const { daysBetween, formatDateWithTime } = require('../utils/index');
 
 const getBorrowedReceipts = `{
     "filter": {
@@ -63,7 +63,7 @@ const createReceiptItem = (item, database_id) => {
     cobrar_arriendo = false
   } = item;
 
-  if (fecha_prestamo !== '') {
+  if (!fecha_prestamo) {
     return '';
   }
 
@@ -74,6 +74,7 @@ const createReceiptItem = (item, database_id) => {
       break;
     case tipoPrestamo.proveedor:
       title = `Recibo recarga proveedor - import - ${fecha_prestamo}`;
+      break;
   }
 
   let diferencia_dias = 0;
@@ -95,41 +96,46 @@ const createReceiptItem = (item, database_id) => {
             },
             "Fecha prestamo": {
                 "date": {
-                    "start": ${fecha_prestamo}, "time_zone": "${TZ}"
+                    "start": "${formatDateWithTime(fecha_prestamo)}", "time_zone": "${TZ}"
                 }
             },
             ${
-              fecha_recepcion &&
-              `"Fecha recepcion": {
-                "date": { "start": ${fecha_recepcion}, "time_zone": "${TZ}" }
+              fecha_recepcion
+                ? `"Fecha recepcion": {
+                "date": { "start": "${formatDateWithTime(fecha_recepcion)}", "time_zone": "${TZ}" }
             },`
+                : ''
             }
             ${
-              cliente_id &&
-              `"Cobrar arriendo": {
-                 "status": { "name": "${cobrar_arriendo ? 'Si' : 'No'}" }
+              cliente_id
+                ? `"Cobrar arriendo": {
+                 "select": { "name": "${cobrar_arriendo ? 'Si' : 'No'}" }
             },`
+                : ''
             }
             ${
-              cliente_id &&
-              `"Cliente": {
-                "relation": [{ "id": ${cliente_id} }]
+              cliente_id
+                ? `"Cliente": {
+                "relation": [{ "id": "${cliente_id}" }]
             },`
+                : ''
             }
             ${
-              proveedor_id &&
-              `"Proveedor": {
-                "relation": [{ "id": ${proveedor_id} }]
+              proveedor_id
+                ? `"Proveedor": {
+                "relation": [{ "id": "${proveedor_id}" }]
             },`
+                : ''
             }
             ${
-              diferencia_dias > 0 &&
-              `"Dias retorno": {
+              diferencia_dias > 0
+                ? `"Dias retorno": {
                 "Number": ${diferencia_dias}
             },`
+                : ''
             }
             "Cilindros": {
-                "relation": [ ${cilindros.map((cilindro) => `{ "id": ${cilindro} }`)} ]
+                "relation": [ ${cilindros.map((cilindro) => `{ "id": "${cilindro}" }`)} ]
             },
             "Prestado a cliente": {
                 "checkbox": ${confirmar_prestamo}
