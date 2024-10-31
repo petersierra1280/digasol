@@ -24,9 +24,15 @@ function daysBetween(date1, date2) {
   return Math.ceil((date1.getTime() - date2.getTime()) / (1000 * 60 * 60 * 24));
 }
 
+function formatDateWithTime(date) {
+  const d = new Date(date);
+  return d.toISOString().split('.')[0];
+}
+
 module.exports = {
   notionApiHeaders,
   mapFilteredProps,
   getISODate,
-  daysBetween
+  daysBetween,
+  formatDateWithTime
 };
