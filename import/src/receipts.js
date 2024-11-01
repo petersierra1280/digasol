@@ -28,6 +28,8 @@ const {
 (async () => {
   const separador = '-----------';
 
+  //#region Funciones globales
+
   const updateCylinderStatus = async (cylinderPageId, recharged = true) => {
     const {
       markCylinderAsRecharged,
@@ -52,12 +54,14 @@ const {
     }
   };
 
+  //#endregion
+
   const importProcess = async () => {
     const recibosErrorOutput = [],
       clientsList = [],
       providersList = [];
 
-    //#region Funciones para aplicar operaciones con las diferentes entidades en Notion
+    //#region Funciones para aplicar operaciones con las entidades en Notion - Importar recibos
 
     const getClientInformation = async (clientName) => {
       const clientExistent = clientsList.find((client) => client.nombres === clientName);
@@ -150,6 +154,24 @@ const {
       }
     };
 
+    const getReceiptListByCylinder = async (cylinderPageId) => {
+      const {
+        mapReceipts,
+        getReceiptsByCylinder,
+        receiptsFilteredProps
+      } = require('../../utils/receipts');
+      const RECEIPTS_FILTERED_PROPS = mapFilteredProps(receiptsFilteredProps);
+      const RECEIPTS_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_RECEIPTS}/query${RECEIPTS_FILTERED_PROPS}`;
+      const response = await fetch(RECEIPTS_REQUEST_URL, {
+        keepalive: true,
+        method: 'POST',
+        headers,
+        body: getReceiptsByCylinder(cylinderPageId)
+      });
+      const data = await response.json();
+      return data.results?.map(mapReceipts);
+    };
+
     //#endregion
 
     console.log(`${cilindros.length} total de cilindros encontrados por procesar...`);
@@ -167,6 +189,7 @@ const {
       let { localizacion } = cilindro;
 
       console.log(`${index}) Procesando cilindro: ${serial}`);
+      index++;
 
       const cliente = clientes.find((cliente) => cliente['nombre'].toUpperCase() === localizacion);
       const proveedor = proveedores.find(
@@ -195,7 +218,14 @@ const {
 
         // 2. Obtener informacion del cilindro asociado -> ID de de la pagina
         const cylinderInfo = await getCylinderInformation(serial);
-        let cylinderPageId = cylinderInfo?.id;
+        const cylinderPageId = cylinderInfo?.id;
+
+        const existsReceipt = await getReceiptListByCylinder(cylinderPageId);
+        if (existsReceipt && existsReceipt.length > 0) {
+          console.log(`Omitiendo cilindro ${serial}, ya tiene un recibo creado`);
+          console.log(separador);
+          continue;
+        }
 
         // 3. Crear nueva pagina para el recibo de prestamo/recarga dependiendo del tipo
         const cilindroEnDigasol = isCylinderInDigasol(localizacion);
@@ -244,7 +274,6 @@ const {
         });
         console.error(`Error procesando cilindro ${serial}: ${message} | ${stack}`);
       }
-      index++;
     }
 
     const endTime = Date.now();
@@ -263,6 +292,8 @@ const {
 
   const deleteAllReceipts = async () => {
     const RATE_LIMIT_CODE = 429;
+
+    //#region Funciones para aplicar operaciones con las entidades en Notion - Remover paginas
 
     const getCylinderInformation = async (cylinderPageId) => {
       const { mapCylinders } = require('../../utils/cylinders');
@@ -381,6 +412,8 @@ const {
       console.log('Todas las paginas se han removido exitosamente!');
     };
 
+    //#endregion
+
     const startTime = Date.now();
     await deleteAllPages();
     const endTime = Date.now();
@@ -394,8 +427,7 @@ const {
   /*
    * TODO:
    * 1.  Finish testing import records
-   * 2.  Ability to resume if the process is interrupted (validate if a cylinder is already associated with a receipt)
-   * 3.  Update cylinders pressure at the moment of updating the recharge status (look at the index.js logic)
+   * 2.  Update cylinders pressure at the moment of updating the recharge status (look at the index.js logic)
    */
 
   switch (executeMode) {

@@ -39,13 +39,13 @@ const getBorrowedReceipts = `{
     }
 }`;
 
-const getReceiptsByCylinder = (serial) => `{
+const getReceiptsByCylinder = (cylinderPageId) => `{
     "filter": {
         "and": [
             {
                 "property": "Cilindros",
                 "relation": {
-                    "contains": "${serial}"
+                    "contains": "${cylinderPageId}"
                 }
             }
         ]
