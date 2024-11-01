@@ -27,11 +27,19 @@ const {
   const separador = '-----------';
 
   const importProcess = async () => {
-    let recibosErrorOutput = [];
+    const recibosErrorOutput = [],
+      clientsList = [],
+      providersList = [];
 
     //#region Funciones para aplicar operaciones con las diferentes entidades en Notion
 
     const getClientInformation = async (clientName) => {
+      const clientExistent = clientsList.find((client) => client.nombres === clientName);
+
+      if (clientExistent) {
+        return clientExistent;
+      }
+
       const { clientsFilteredProps, getClientsByName, mapClients } = require('../../utils/clients');
       const CLIENTS_FILTERED_PROPS = mapFilteredProps(clientsFilteredProps);
       const CLIENTS_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_CLIENTS}/query${CLIENTS_FILTERED_PROPS}`;
@@ -43,10 +51,18 @@ const {
         body: getClientsByName(clientName)
       });
       const clientsData = await responseClient.json();
-      return clientsData.results.map(mapClients)[0];
+      const client = clientsData.results.map(mapClients)[0];
+      clientsList.push(client);
+      return client;
     };
 
     const getProviderInformation = async (providerName) => {
+      const providerExistent = providersList.find((provider) => provider.nombres === providerName);
+
+      if (providerExistent) {
+        return providerExistent;
+      }
+
       const {
         providersFilteredProps,
         getProvidersByName,
@@ -62,7 +78,9 @@ const {
         body: getProvidersByName(providerName)
       });
       const providersData = await responseProvider.json();
-      return providersData.results.map(mapProviders)[0];
+      const provider = providersData.results.map(mapProviders)[0];
+      providersList.push(provider);
+      return provider;
     };
 
     const getCylinderInformation = async (serial) => {
@@ -324,7 +342,6 @@ const {
    * 2.2 Delete product inventory records related with the receipt at the moment of being removed
    * 3.  Ability to resume if the process is interrupted (validate if a cylinder is already associated with a receipt)
    * 4.  Update cylinders pressure at the moment of updating the recharge status (look at the index.js logic)
-   * 5.  Save a local cache of clients and providers coming from the Notion API
    */
 
   switch (executeMode) {
