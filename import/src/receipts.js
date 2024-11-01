@@ -28,6 +28,30 @@ const {
 (async () => {
   const separador = '-----------';
 
+  const updateCylinderStatus = async (cylinderPageId, recharged = true) => {
+    const {
+      markCylinderAsRecharged,
+      markCylinderAsNotRecharged
+    } = require('../../utils/cylinders');
+    const result = await fetch(`${NOTION_API_URL}/pages/${cylinderPageId}`, {
+      keepalive: true,
+      method: 'PATCH',
+      headers,
+      body: recharged ? markCylinderAsRecharged() : markCylinderAsNotRecharged()
+    });
+    if (!result.ok) {
+      console.error(
+        'Error actualizando el estado del cilindro. Response: ',
+        result.status,
+        result.statusText
+      );
+      const errorBody = await result.text();
+      console.error('Response body: ', errorBody);
+    } else {
+      console.log('Estado del cilindro actualizado exitosamente');
+    }
+  };
+
   const importProcess = async () => {
     const recibosErrorOutput = [],
       clientsList = [],
@@ -123,30 +147,6 @@ const {
         console.error('Response body: ', errorBody);
       } else {
         console.log('Recibo creado exitosamente');
-      }
-    };
-
-    const updateCylinderStatus = async (cylinderPageId, recharged = true) => {
-      const {
-        markCylinderAsRecharged,
-        markCylinderAsNotRecharged
-      } = require('../../utils/cylinders');
-      const result = await fetch(`${NOTION_API_URL}/pages/${cylinderPageId}`, {
-        keepalive: true,
-        method: 'PATCH',
-        headers,
-        body: recharged ? markCylinderAsRecharged() : markCylinderAsNotRecharged()
-      });
-      if (!result.ok) {
-        console.error(
-          'Error actualizando el estado del cilindro. Response: ',
-          result.status,
-          result.statusText
-        );
-        const errorBody = await result.text();
-        console.error('Response body: ', errorBody);
-      } else {
-        console.log('Estado del cilindro actualizado exitosamente');
       }
     };
 
@@ -351,6 +351,9 @@ const {
             const cylinderInfo = await getCylinderInformation(cilindroReciboId);
             console.log(`Deleted receipt page: ${receiptPageId}`);
 
+            // Mark cylinder as pending for recharge
+            await updateCylinderStatus(cilindroReciboId, false);
+
             // Remove all product inventory pages related with the cylinder
             const inventoryItems = await getInventoryItemsByCylinder(cylinderInfo.serial);
             if (inventoryItems && inventoryItems.length > 0) {
@@ -382,10 +385,8 @@ const {
   /*
    * TODO:
    * 1.  Finish testing import records
-   * 2.  When removing receipts...
-   * 2.1 Restore cylinder status to "pending for recharge" when removing receipts
-   * 3.  Ability to resume if the process is interrupted (validate if a cylinder is already associated with a receipt)
-   * 4.  Update cylinders pressure at the moment of updating the recharge status (look at the index.js logic)
+   * 2.  Ability to resume if the process is interrupted (validate if a cylinder is already associated with a receipt)
+   * 3.  Update cylinders pressure at the moment of updating the recharge status (look at the index.js logic)
    */
 
   switch (executeMode) {
