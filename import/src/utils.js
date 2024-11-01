@@ -51,6 +51,11 @@ const isCylinderInDigasol = (localization) => {
   return localization.toLowerCase().includes(DIGASOL);
 };
 
+const getProcessDurationInMins = (startTime, endTime) => {
+  const durationInMs = endTime - startTime;
+  return (durationInMs / (1000 * 60)).toFixed(2);
+};
+
 module.exports = {
   writeJsonFile,
   sleep,
@@ -60,5 +65,6 @@ module.exports = {
   CLIENTE_PARTICULAR,
   SLEEP_TIMEOUT,
   receiptStatus,
-  providersFromImport
+  providersFromImport,
+  getProcessDurationInMins
 };
