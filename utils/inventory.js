@@ -25,6 +25,19 @@ const getInventoryList = (items, cursorId) => {
   return `{ ${query} }`;
 };
 
+const getInventoryByCylinder = (serial) => `{
+    "filter": {
+        "and": [
+            {
+                "property": "Serial cilindro",
+                "rich_text": {
+                    "equals": "${serial}"
+                }
+            }
+        ]
+    }
+}`;
+
 function mapInventoryItem(item) {
   const { properties, id } = item;
   return {
@@ -69,5 +82,6 @@ module.exports = {
   getInventoryList,
   mapInventoryItem,
   inventoryFilteredProps,
-  createInventoryItem
+  createInventoryItem,
+  getInventoryByCylinder
 };

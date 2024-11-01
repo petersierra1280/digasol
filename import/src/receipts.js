@@ -21,7 +21,8 @@ const {
   NOTION_DATABASE_CLIENTS,
   NOTION_DATABASE_PROVIDERS,
   NOTION_DATABASE_CYLINDERS,
-  NOTION_DATABASE_RECEIPTS
+  NOTION_DATABASE_RECEIPTS,
+  NOTION_DATABASE_INVENTORY
 } = process.env;
 
 (async () => {
@@ -260,6 +261,35 @@ const {
   const deleteAllReceipts = async () => {
     const RATE_LIMIT_CODE = 429;
 
+    const getCylinderInformation = async (cylinderPageId) => {
+      const { mapCylinders } = require('../../utils/cylinders');
+      const response = await fetch(`${NOTION_API_URL}/pages/${cylinderPageId}`, {
+        keepalive: true,
+        method: 'GET',
+        headers
+      });
+      const data = await response.json();
+      return mapCylinders(data);
+    };
+
+    const getInventoryItemsByCylinder = async (serial) => {
+      const {
+        mapInventoryItem,
+        getInventoryByCylinder,
+        inventoryFilteredProps
+      } = require('../../utils/inventory');
+      const INVENTORY_FILTERED_PROPS = mapFilteredProps(inventoryFilteredProps);
+      const INVENTORY_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_INVENTORY}/query${INVENTORY_FILTERED_PROPS}`;
+      const response = await fetch(INVENTORY_REQUEST_URL, {
+        keepalive: true,
+        method: 'POST',
+        headers,
+        body: getInventoryByCylinder(serial)
+      });
+      const data = await response.json();
+      return data.results.map(mapInventoryItem);
+    };
+
     const getPages = async (nextPage = null) => {
       const { receiptsFilteredProps } = require('../../utils/receipts');
       const RECEIPTS_FILTERED_PROPS = mapFilteredProps(receiptsFilteredProps);
@@ -304,6 +334,8 @@ const {
     };
 
     const deleteAllPages = async () => {
+      const { mapReceipts } = require('../../utils/receipts');
+
       let hasMore = true,
         nextPage = null;
 
@@ -312,9 +344,21 @@ const {
 
         for (const page of results) {
           const { id: receiptPageId } = page;
+          const { cilindros: cilindroReciboId } = mapReceipts(page);
           const success = await deletePage(receiptPageId);
+
           if (success) {
-            console.log(`Deleted page: ${receiptPageId}`);
+            const cylinderInfo = await getCylinderInformation(cilindroReciboId);
+            console.log(`Deleted receipt page: ${receiptPageId}`);
+
+            // Remove all product inventory pages related with the cylinder
+            const inventoryItems = await getInventoryItemsByCylinder(cylinderInfo.serial);
+            if (inventoryItems && inventoryItems.length > 0) {
+              for (const inventory of inventoryItems) {
+                await deletePage(inventory.id);
+                console.log(`Deleted inventory page: ${inventory.id}`);
+              }
+            }
           } else {
             console.error(`Failed to delete receipt page: ${receiptPageId}`);
           }
@@ -340,7 +384,6 @@ const {
    * 1.  Finish testing import records
    * 2.  When removing receipts...
    * 2.1 Restore cylinder status to "pending for recharge" when removing receipts
-   * 2.2 Delete product inventory records related with the receipt at the moment of being removed
    * 3.  Ability to resume if the process is interrupted (validate if a cylinder is already associated with a receipt)
    * 4.  Update cylinders pressure at the moment of updating the recharge status (look at the index.js logic)
    */

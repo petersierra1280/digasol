@@ -81,7 +81,7 @@ const markCylinderAsRecharged = () => updateCylinderRechargeStatus(cylindersRech
 const markCylinderAsNotRecharged = () =>
   updateCylinderRechargeStatus(cylindersRechargeStatus.not_charged);
 
-function mapCylinders(item, cameFrom) {
+function mapCylinders(item, cameFrom = '') {
   const { properties, id } = item;
   const baseProps = {
     id,

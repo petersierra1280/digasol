@@ -39,16 +39,30 @@ const getBorrowedReceipts = `{
     }
 }`;
 
+const getReceiptsByCylinder = (serial) => `{
+    "filter": {
+        "and": [
+            {
+                "property": "Cilindros",
+                "relation": {
+                    "contains": "${serial}"
+                }
+            }
+        ]
+    }
+}`;
+
 function mapReceipts(item) {
   const { properties, id } = item;
   return {
     id,
-    numero_recibo: properties['Numero recibo'].unique_id.number
+    numero_recibo: properties['Numero recibo'].unique_id.number,
+    cilindros: properties['Cilindros']?.relation[0]?.id
   };
 }
 
-// Se filtran las siguientes props: ID y Numero recibo
-const receiptsFilteredProps = ['YXYo'];
+// Se filtran las siguientes props: ID, Numero recibo y Cilindros
+const receiptsFilteredProps = ['YXYo', '%7C%60Gg'];
 
 const createReceiptItem = (item, database_id) => {
   const {
@@ -154,5 +168,6 @@ module.exports = {
   mapReceipts,
   receiptsFilteredProps,
   createReceiptItem,
-  tipoPrestamo
+  tipoPrestamo,
+  getReceiptsByCylinder
 };
