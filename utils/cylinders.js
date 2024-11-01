@@ -99,7 +99,7 @@ function mapCylinders(item, cameFrom) {
       break;
     }
     case cylindersCameFrom.receipts:
-      baseProps.proveedor = properties['Proveedor'].relation[0].id;
+      baseProps.proveedor = properties['Proveedor']?.relation[0].id;
       break;
   }
   return baseProps;
