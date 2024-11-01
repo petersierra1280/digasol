@@ -9,6 +9,7 @@ const {
   sleep,
   validateStringDate,
   isCylinderInDigasol,
+  getProcessDurationInMins,
   SLEEP_TIMEOUT,
   receiptStatus,
   providersFromImport
@@ -248,8 +249,7 @@ const {
     }
 
     const endTime = Date.now();
-    const durationInMs = endTime - startTime;
-    const durationInMinutes = (durationInMs / (1000 * 60)).toFixed(2);
+    const durationInMinutes = getProcessDurationInMins(startTime, endTime);
     console.log(`Proceso de importacion tomo ${durationInMinutes} mins`);
 
     if (recibosErrorOutput.length > 0) {
@@ -376,7 +376,11 @@ const {
       console.log('All receipt pages deleted successfully!');
     };
 
+    const startTime = Date.now();
     await deleteAllPages();
+    const endTime = Date.now();
+    const durationInMinutes = getProcessDurationInMins(startTime, endTime);
+    console.log(`Removing pages process took ${durationInMinutes} mins`);
   };
 
   const args = process.argv.slice(2);
