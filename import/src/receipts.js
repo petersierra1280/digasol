@@ -392,6 +392,7 @@ const {
    * 2.  Ability to resume if the process is interrupted (validate if a cylinder is already associated with a receipt)
    * 3.  Update cylinders pressure at the moment of updating the recharge status (look at the index.js logic)
    * 4.  Move non-util functions from utils.js to a new enums.js file
+   * 5.  Change English with Spanish comments in func deleteAllReceipts
    */
 
   switch (executeMode) {
