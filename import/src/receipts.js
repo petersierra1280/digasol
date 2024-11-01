@@ -313,7 +313,7 @@ const {
 
       const data = await response.json();
       if (data.status === RATE_LIMIT_CODE) {
-        console.error('Rate limit exceeded. Retrying after delay...');
+        console.error('Se supero el limite del API de Notion. Reintentando despues de 1 min...');
         await sleep(SLEEP_TIMEOUT.rate_limit);
         return getPages(nextPage);
       }
@@ -321,7 +321,7 @@ const {
     };
 
     const deletePage = async (pageId) => {
-      console.log(`Deleting page ${pageId}`);
+      console.log(`Removiendo pagina ${pageId}`);
       const response = await fetch(`${NOTION_API_URL}/pages/${pageId}`, {
         method: 'PATCH',
         headers,
@@ -331,7 +331,9 @@ const {
       });
 
       if (response.status === RATE_LIMIT_CODE) {
-        console.error(`Rate limit exceeded while deleting page ${pageId}. Retrying after delay...`);
+        console.error(
+          `Se supero el limite del API de Notion mientras se borraba la pagina ${pageId}. Reintentando despues de 1 min...`
+        );
         await sleep(SLEEP_TIMEOUT.rate_limit);
         return deletePage(pageId);
       }
@@ -354,7 +356,7 @@ const {
 
           if (success) {
             const cylinderInfo = await getCylinderInformation(cilindroReciboId);
-            console.log(`Deleted receipt page: ${receiptPageId}`);
+            console.log(`Se removio la pagina del recibo: ${receiptPageId}`);
 
             // Mark cylinder as pending for recharge
             await updateCylinderStatus(cilindroReciboId, false);
@@ -364,11 +366,11 @@ const {
             if (inventoryItems && inventoryItems.length > 0) {
               for (const inventory of inventoryItems) {
                 await deletePage(inventory.id);
-                console.log(`Deleted inventory page: ${inventory.id}`);
+                console.log(`Se removio la pagina del inventario: ${inventory.id}`);
               }
             }
           } else {
-            console.error(`Failed to delete receipt page: ${receiptPageId}`);
+            console.error(`No se pudo remover la pagina del recibo: ${receiptPageId}`);
           }
           console.log(separador);
           await sleep();
@@ -378,14 +380,14 @@ const {
         hasMore = has_more;
       }
 
-      console.log('All receipt pages deleted successfully!');
+      console.log('Todas las paginas se han removido exitosamente!');
     };
 
     const startTime = Date.now();
     await deleteAllPages();
     const endTime = Date.now();
     const durationInMinutes = getProcessDurationInMins(startTime, endTime);
-    console.log(`Removing pages process took ${durationInMinutes} mins`);
+    console.log(`Remover todas las paginas tomo ${durationInMinutes} mins`);
   };
 
   const args = process.argv.slice(2);
@@ -397,7 +399,6 @@ const {
    * 2.  Ability to resume if the process is interrupted (validate if a cylinder is already associated with a receipt)
    * 3.  Update cylinders pressure at the moment of updating the recharge status (look at the index.js logic)
    * 4.  Move non-util functions from utils.js to a new enums.js file
-   * 5.  Change English with Spanish comments in func deleteAllReceipts
    */
 
   switch (executeMode) {
