@@ -3,6 +3,14 @@ const writeJsonFile = (file, jsonVariable) => {
   fs.writeFileSync(`output/${file}.json`, JSON.stringify(jsonVariable));
 };
 
+const removeJsonFile = (file) => {
+  const { existsSync, unlinkSync } = require('node:fs');
+  const filePath = `output/${file}.json`;
+  if (existsSync(filePath)) {
+    unlinkSync(filePath);
+  }
+};
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms || SLEEP_TIMEOUT.default));
 }
@@ -58,6 +66,7 @@ const getProcessDurationInMins = (startTime, endTime) => {
 
 module.exports = {
   writeJsonFile,
+  removeJsonFile,
   sleep,
   getCurrentDate,
   validateStringDate,

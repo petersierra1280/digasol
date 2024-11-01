@@ -6,6 +6,7 @@ const cilindros = require('./files/cilindros_full.json');
 
 const {
   writeJsonFile,
+  removeJsonFile,
   sleep,
   validateStringDate,
   isCylinderInDigasol,
@@ -252,9 +253,13 @@ const {
     const durationInMinutes = getProcessDurationInMins(startTime, endTime);
     console.log(`Proceso de importacion tomo ${durationInMinutes} mins`);
 
+    const outputFile = 'recibos_errored';
+
     if (recibosErrorOutput.length > 0) {
       console.error(`Se produjeron ${recibosErrorOutput.length} errores durante la ejecucion.`);
-      writeJsonFile('recibos_errored', recibosErrorOutput);
+      writeJsonFile(outputFile, recibosErrorOutput);
+    } else {
+      removeJsonFile(outputFile);
     }
   };
 
