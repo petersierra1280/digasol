@@ -2,7 +2,8 @@ const proveedores = require('./files/proveedores.json');
 const clientes = require('./files/clientes.json');
 const cilindros = require('./files/cilindros.json');
 
-const { writeJsonFile, CLIENTE_PARTICULAR } = require('./utils');
+const { writeJsonFile } = require('./utils');
+const { CLIENTE_PARTICULAR } = require('./enums');
 
 let cilindrosOutput = [];
 
@@ -30,9 +31,9 @@ cilindros.forEach((cilindro) => {
   const cantidadProducto = {
     '1/4': 0.25,
     '3/4': 0.75,
-    'Lleno': 1,
-    'Medio': 0.5,
-    'Vacio': 0
+    Lleno: 1,
+    Medio: 0.5,
+    Vacio: 0
   };
   // Calculo en PSI de la presion del cilindro en base al contenido del frasco
   cilindro['Presion'] = presionBase * cantidadProducto[cilindro['Contenido']];
@@ -42,9 +43,9 @@ cilindros.forEach((cilindro) => {
   const codigoProveedor = cilindro['CodigoProveedor'];
   const esCliente = codigoProveedor.charAt(0) === 'C';
   const origen = esCliente ? clientes : proveedores;
-  let propietarioCilindro = origen.find(item => item['codigo'] === codigoProveedor);
+  let propietarioCilindro = origen.find((item) => item['codigo'] === codigoProveedor);
   if (!propietarioCilindro) {
-    propietarioCilindro = clientes.find(cliente => cliente['codigo'] === CLIENTE_PARTICULAR);
+    propietarioCilindro = clientes.find((cliente) => cliente['codigo'] === CLIENTE_PARTICULAR);
   }
   cilindro[esCliente ? 'Cliente' : 'Proveedor'] = propietarioCilindro['nombre'];
   //#endregion
