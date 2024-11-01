@@ -35,6 +35,15 @@ const receiptStatus = {
   no_disponible: 'NO_DISPONIBLE'
 };
 
+const providersFromImport = {
+  DIGASOL: 'Digasol',
+  'DOMICILIOS CRISTOBAL': 'Domicilios Cristobal',
+  AGA: 'AGA (Messer Colombia S.A.)',
+  'GASES DE LA COSTA': 'Gases de la Costa',
+  'GAS PLUS': 'Gas Plus',
+  OXINORT: 'Oxinort'
+};
+
 const isCylinderInDigasol = (localization) => {
   if (!localization || typeof localization !== 'string') {
     return false;
@@ -50,5 +59,6 @@ module.exports = {
   isCylinderInDigasol,
   CLIENTE_PARTICULAR,
   SLEEP_TIMEOUT,
-  receiptStatus
+  receiptStatus,
+  providersFromImport
 };

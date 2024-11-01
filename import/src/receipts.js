@@ -10,7 +10,8 @@ const {
   validateStringDate,
   isCylinderInDigasol,
   SLEEP_TIMEOUT,
-  receiptStatus
+  receiptStatus,
+  providersFromImport
 } = require('./utils');
 const { mapFilteredProps, notionApiHeaders: headers } = require('../../utils/index');
 const { tipoPrestamo: prestamos } = require('../../utils/receipts');
@@ -172,8 +173,8 @@ const {
       );
 
       const tipoPrestamo = cliente ? prestamos.cliente : proveedor ? prestamos.proveedor : 'N/A';
-      if (tipoPrestamo === prestamos.proveedor && localizacion === 'AGA') {
-        localizacion = 'AGA (Messer Colombia S.A.)';
+      if (tipoPrestamo === prestamos.proveedor && providersFromImport[localizacion]) {
+        localizacion = providersFromImport[localizacion];
       }
       try {
         //#region Proceso de importacion de los recibos
