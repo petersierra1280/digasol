@@ -4,6 +4,8 @@ const SLEEP_TIMEOUT = {
   default: 500,
   rate_limit: 60000
 };
+const MAX_RETRY_ATTEMPTS = 3;
+const HTTP_CONFLICT_ERROR = 409;
 
 const receiptStatus = {
   disponible: 'DISPONIBLE',
@@ -23,6 +25,8 @@ module.exports = {
   CLIENTE_PARTICULAR,
   CAMBIO_CILINDRO,
   SLEEP_TIMEOUT,
+  MAX_RETRY_ATTEMPTS,
+  HTTP_CONFLICT_ERROR,
   receiptStatus,
   providersFromImport
 };

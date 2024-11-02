@@ -12,7 +12,14 @@ const {
   isCylinderInDigasol,
   getProcessDurationInMins
 } = require('./utils');
-const { SLEEP_TIMEOUT, CAMBIO_CILINDRO, receiptStatus, providersFromImport } = require('./enums');
+const {
+  SLEEP_TIMEOUT,
+  CAMBIO_CILINDRO,
+  MAX_RETRY_ATTEMPTS,
+  HTTP_CONFLICT_ERROR,
+  receiptStatus,
+  providersFromImport
+} = require('./enums');
 const { mapFilteredProps, notionApiHeaders: headers } = require('../../utils/index');
 const { tipoPrestamo: prestamos } = require('../../utils/receipts');
 
@@ -45,22 +52,42 @@ const {
       body.properties[key] = JSON.parse(pressureValue);
       body = JSON.stringify(body);
     }
-    const result = await fetch(`${NOTION_API_URL}/pages/${cylinderPageId}`, {
-      keepalive: true,
-      method: 'PATCH',
-      headers,
-      body
-    });
-    if (!result.ok) {
-      console.error(
-        'Error actualizando el estado del cilindro. Response: ',
-        result.status,
-        result.statusText
-      );
-      const errorBody = await result.text();
-      console.error('Response body: ', errorBody);
-    } else {
-      console.log('Estado del cilindro actualizado exitosamente');
+
+    let attempt = 0;
+
+    while (attempt < MAX_RETRY_ATTEMPTS) {
+      const result = await fetch(`${NOTION_API_URL}/pages/${cylinderPageId}`, {
+        keepalive: true,
+        method: 'PATCH',
+        headers,
+        body
+      });
+      if (result.ok) {
+        console.log('Estado del cilindro actualizado exitosamente');
+        return;
+      } else if (result.status === HTTP_CONFLICT_ERROR) {
+        attempt++;
+        console.warn(
+          `Conflicto al intentar actualizar el cilindro. Intento ${attempt} de ${MAX_RETRY_ATTEMPTS}.`
+        );
+
+        if (attempt < MAX_RETRY_ATTEMPTS) {
+          await sleep();
+          continue;
+        } else {
+          console.error('Se alcanzo el maximo de intentos para actualizar el estado del cilindro');
+        }
+      } else {
+        console.error(
+          'Error actualizando el estado del cilindro. Response: ',
+          result.status,
+          result.statusText
+        );
+        console.error('Request body: ', body);
+        const errorBody = await result.text();
+        console.error('Response body: ', errorBody);
+        break;
+      }
     }
   };
 
@@ -159,6 +186,7 @@ const {
       });
       if (!result.ok) {
         console.error('Error creando recibo. Response: ', result.status, result.statusText);
+        console.error('Request body: ', body);
         const errorBody = await result.text();
         console.error('Response body: ', errorBody);
       } else {
@@ -264,7 +292,7 @@ const {
         };
         if (!confirmarPrestamo && cylinderInfo.proveedor) {
           // Sobreescribe el ID del proveedor para referenciar la recepcion de un cilindro de parte del proveedor
-          entityInfo = cylinderInfo.proveedor;
+          entityId = cylinderInfo.proveedor;
         }
         receiptItem[tipoPrestamo === prestamos.cliente ? 'cliente_id' : 'proveedor_id'] = entityId;
 
