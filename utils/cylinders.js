@@ -86,10 +86,6 @@ const cylindersRechargeStatus = {
   charged: 'Recargado'
 };
 
-const markCylinderAsRecharged = () => updateCylinderRechargeStatus(cylindersRechargeStatus.charged);
-const markCylinderAsNotRecharged = () =>
-  updateCylinderRechargeStatus(cylindersRechargeStatus.not_charged);
-
 function mapCylinders(item, cameFrom = '') {
   const { properties, id } = item;
   const baseProps = {
@@ -173,11 +169,11 @@ module.exports = {
   getCylindersFromReceipt,
   getCylindersByProvider,
   getCylindersBySerial,
-  markCylinderAsRecharged,
-  markCylinderAsNotRecharged,
+  updateCylinderRechargeStatus,
   updateCylinderPressure,
   mapCylinders,
   cylinderProps,
   getCylinderPressure,
-  cylindersCameFrom
+  cylindersCameFrom,
+  cylindersRechargeStatus
 };

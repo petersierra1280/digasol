@@ -37,15 +37,18 @@ const {
 
   //#region Funciones globales
 
-  const { getCylinderPressure } = require('../../utils/cylinders');
+  const { getCylinderPressure, cylindersRechargeStatus } = require('../../utils/cylinders');
 
-  const updateCylinderStatus = async (cylinderPageId, recharged = true, pressure) => {
+  const updateCylinderStatus = async (
+    cylinderPageId,
+    chargeStatus = cylindersRechargeStatus.charged,
+    pressure
+  ) => {
     const {
-      markCylinderAsRecharged,
-      markCylinderAsNotRecharged,
+      updateCylinderRechargeStatus,
       updateCylinderPressure
     } = require('../../utils/cylinders');
-    let body = recharged ? markCylinderAsRecharged() : markCylinderAsNotRecharged();
+    let body = updateCylinderRechargeStatus(chargeStatus);
     if (pressure) {
       const { key, value: pressureValue } = updateCylinderPressure(pressure);
       body = JSON.parse(body);
@@ -290,6 +293,16 @@ const {
           confirmar_prestamo: confirmarPrestamo,
           cobrar_arriendo: false // No se marcaran para cobrar arriendo, ya que ningun cilindro tiene el valor por dia configurado
         };
+        const {
+          in_progress: rechargeInProgress,
+          charged: recharged,
+          not_charged: notCharged
+        } = cylindersRechargeStatus;
+        let estadoRecargaCilindro = confirmarPrestamo
+          ? tipoPrestamo === prestamos.proveedor
+            ? rechargeInProgress
+            : recharged
+          : notCharged;
         if (!confirmarPrestamo && cylinderInfo.proveedor) {
           // Sobreescribe el ID del proveedor para referenciar la recepcion de un cilindro de parte del proveedor
           entityId = cylinderInfo.proveedor;
@@ -305,7 +318,7 @@ const {
           claseDeGas,
           contenido
         );
-        await updateCylinderStatus(cylinderPageId, confirmarPrestamo, cylinderPressure);
+        await updateCylinderStatus(cylinderPageId, estadoRecargaCilindro, cylinderPressure);
 
         // Evitar problemas con el max rate del API de Notion
         await sleep();
@@ -444,7 +457,7 @@ const {
             console.log(`Se removio la pagina del recibo: ${receiptPageId}`);
 
             // Mark cylinder as pending for recharge
-            await updateCylinderStatus(cilindroReciboId, false);
+            await updateCylinderStatus(cilindroReciboId, cylindersRechargeStatus.not_charged);
 
             // Remove all product inventory pages related with the cylinder
             const inventoryItems = await getInventoryItemsByCylinder(cylinderInfo.serial);
