@@ -12,7 +12,7 @@ const {
   isCylinderInDigasol,
   getProcessDurationInMins
 } = require('./utils');
-const { SLEEP_TIMEOUT, receiptStatus, providersFromImport } = require('./enums');
+const { SLEEP_TIMEOUT, CAMBIO_CILINDRO, receiptStatus, providersFromImport } = require('./enums');
 const { mapFilteredProps, notionApiHeaders: headers } = require('../../utils/index');
 const { tipoPrestamo: prestamos } = require('../../utils/receipts');
 
@@ -74,7 +74,7 @@ const {
     //#region Funciones para aplicar operaciones con las entidades en Notion - Importar recibos
 
     const getClientInformation = async (clientName) => {
-      const clientExistent = clientsList.find((client) => client.nombres === clientName);
+      const clientExistent = clientsList.find((client) => client && client.nombres === clientName);
 
       if (clientExistent) {
         return clientExistent;
@@ -97,7 +97,9 @@ const {
     };
 
     const getProviderInformation = async (providerName) => {
-      const providerExistent = providersList.find((provider) => provider.nombres === providerName);
+      const providerExistent = providersList.find(
+        (provider) => provider && provider.nombres === providerName
+      );
 
       if (providerExistent) {
         return providerExistent;
@@ -193,14 +195,20 @@ const {
         fechaentrada: fechaEntrada,
         fechasalida: fechaSalida,
         fechalimite: fechaRetorno,
-        codigo: serial,
         estado,
         medidas: unidadMedida,
         capacidad,
         clase: claseDeGas,
         contenido
       } = cilindro;
-      let { localizacion } = cilindro;
+      let { localizacion, codigo: serial } = cilindro;
+      serial = serial.toString();
+
+      if (localizacion === CAMBIO_CILINDRO) {
+        console.log(`Omitiendo cilindro ${serial}, no se encuentra prestado - cambio de cilindro`);
+        console.log(separador);
+        continue;
+      }
 
       console.log(`${index}) Procesando cilindro: ${serial}`);
       index++;
@@ -443,7 +451,7 @@ const {
 
   const args = process.argv.slice(2);
   const executeMode = args[0] || 'import';
-  
+
   switch (executeMode) {
     case 'import':
       await importProcess();
