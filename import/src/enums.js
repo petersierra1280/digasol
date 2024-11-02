@@ -16,7 +16,7 @@ const providersFromImport = {
   DIGASOL: 'Digasol',
   'DOMICILIOS CRISTOBAL': 'Domicilios Cristobal',
   AGA: 'AGA (Messer Colombia S.A.)',
-  'GASES DE LA COSTA': 'Gases de la Costa',
+  'GASES DE LA COSTA CTG': 'Gases de la Costa',
   'GAS PLUS': 'Gas Plus',
   OXINORT: 'Oxinort'
 };
