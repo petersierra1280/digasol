@@ -1,4 +1,5 @@
 const CLIENTE_PARTICULAR = 'C00000';
+const CAMBIO_CILINDRO = 'CAMBIO DE CILINDRO';
 const SLEEP_TIMEOUT = {
   default: 500,
   rate_limit: 60000
@@ -20,6 +21,7 @@ const providersFromImport = {
 
 module.exports = {
   CLIENTE_PARTICULAR,
+  CAMBIO_CILINDRO,
   SLEEP_TIMEOUT,
   receiptStatus,
   providersFromImport
