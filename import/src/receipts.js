@@ -443,12 +443,7 @@ const {
 
   const args = process.argv.slice(2);
   const executeMode = args[0] || 'import';
-
-  /*
-   * TODO:
-   * 1.  Finish testing import records
-   */
-
+  
   switch (executeMode) {
     case 'import':
       await importProcess();
