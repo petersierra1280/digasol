@@ -3,41 +3,18 @@ const clientes = require('./files/clientes.json');
 const cilindros = require('./files/cilindros.json');
 
 const { writeJsonFile } = require('./utils');
+const { getCylinderPressure } = require('../../utils/cylinders');
 const { CLIENTE_PARTICULAR } = require('./enums');
 
 let cilindrosOutput = [];
 
 cilindros.forEach((cilindro) => {
-  //#region  Calcular presion del cilindro
-  let presionBase = 0;
-  switch (cilindro['Unidad de medida']) {
-    case 'Kilogramos':
-      presionBase = 300;
-      break;
-
-    case 'Metros cubicos':
-      if (cilindro['Capacidad'] >= 11 || ['Argon', 'Mezcla'].includes(cilindro['Clase de gas'])) {
-        presionBase = 2900;
-      } else {
-        presionBase = 2000;
-      }
-      break;
-
-    default:
-      presionBase = 2000;
-      break;
-  }
-
-  const cantidadProducto = {
-    '1/4': 0.25,
-    '3/4': 0.75,
-    Lleno: 1,
-    Medio: 0.5,
-    Vacio: 0
-  };
-  // Calculo en PSI de la presion del cilindro en base al contenido del frasco
-  cilindro['Presion'] = presionBase * cantidadProducto[cilindro['Contenido']];
-  //#endregion
+  cilindro['Presion'] = getCylinderPressure(
+    cilindro['Unidad de medida'],
+    cilindro['Capacidad'],
+    cilindro['Clase de gas'],
+    cilindro['Contenido']
+  );
 
   //#region Obtener proveedor/cliente propietario del cilindro
   const codigoProveedor = cilindro['CodigoProveedor'];

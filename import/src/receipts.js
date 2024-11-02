@@ -30,16 +30,26 @@ const {
 
   //#region Funciones globales
 
-  const updateCylinderStatus = async (cylinderPageId, recharged = true) => {
+  const { getCylinderPressure } = require('../../utils/cylinders');
+
+  const updateCylinderStatus = async (cylinderPageId, recharged = true, pressure) => {
     const {
       markCylinderAsRecharged,
-      markCylinderAsNotRecharged
+      markCylinderAsNotRecharged,
+      updateCylinderPressure
     } = require('../../utils/cylinders');
+    let body = recharged ? markCylinderAsRecharged() : markCylinderAsNotRecharged();
+    if (pressure) {
+      const { key, value: pressureValue } = updateCylinderPressure(pressure);
+      body = JSON.parse(body);
+      body.properties[key] = JSON.parse(pressureValue);
+      body = JSON.stringify(body);
+    }
     const result = await fetch(`${NOTION_API_URL}/pages/${cylinderPageId}`, {
       keepalive: true,
       method: 'PATCH',
       headers,
-      body: recharged ? markCylinderAsRecharged() : markCylinderAsNotRecharged()
+      body
     });
     if (!result.ok) {
       console.error(
@@ -184,7 +194,11 @@ const {
         fechasalida: fechaSalida,
         fechalimite: fechaRetorno,
         codigo: serial,
-        estado
+        estado,
+        medidas: unidadMedida,
+        capacidad,
+        clase: claseDeGas,
+        contenido
       } = cilindro;
       let { localizacion } = cilindro;
 
@@ -248,8 +262,14 @@ const {
 
         await createReceipt(receiptItem);
 
-        // 4. Actualizar el cilindro asociado -> Estado recargado (siempre y cuando el prestamo este en progreso)
-        await updateCylinderStatus(cylinderPageId, confirmarPrestamo);
+        // 4. Actualizar el cilindro asociado -> Estado recargado (siempre y cuando el prestamo este en progreso) | actualizar la presion mas reciente
+        const cylinderPressure = getCylinderPressure(
+          unidadMedida,
+          capacidad,
+          claseDeGas,
+          contenido
+        );
+        await updateCylinderStatus(cylinderPageId, confirmarPrestamo, cylinderPressure);
 
         // Evitar problemas con el max rate del API de Notion
         await sleep();
@@ -427,7 +447,6 @@ const {
   /*
    * TODO:
    * 1.  Finish testing import records
-   * 2.  Update cylinders pressure at the moment of updating the recharge status (look at the index.js logic)
    */
 
   switch (executeMode) {

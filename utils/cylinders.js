@@ -71,6 +71,15 @@ const updateCylinderRechargeStatus = (rechargeStatus) => `{
     }
 }`;
 
+const updateCylinderPressure = (pressure) => {
+  return {
+    key: 'Presion',
+    value: `{
+        "number": ${pressure}
+    }`
+  };
+};
+
 const cylindersRechargeStatus = {
   not_charged: 'Por recargar',
   in_progress: 'En recarga proveedor',
@@ -127,13 +136,48 @@ const cylinderProps = (cameFrom) => {
   }
 };
 
+const getCylinderPressure = (unidadMedida, capacidad, claseDeGas, contenido) => {
+  const cantidadProducto = {
+    '1/4': 0.25,
+    '3/4': 0.75,
+    Lleno: 1,
+    Medio: 0.5,
+    Vacio: 0
+  };
+  let presionBase = 0;
+  switch (unidadMedida) {
+    case 'Kilogramos':
+    case 'Kg':
+      presionBase = 300;
+      break;
+
+    case 'Metros cubicos':
+    case 'M3':
+      if (capacidad >= 11 || ['Argon', 'Mezcla', 'AR', 'AGAMIX'].includes(claseDeGas)) {
+        presionBase = 2900;
+      } else {
+        presionBase = 2000;
+      }
+      break;
+
+    default:
+      presionBase = 2000;
+      break;
+  }
+
+  // Calculo en PSI de la presion del cilindro en base al contenido del frasco
+  return presionBase * cantidadProducto[contenido];
+};
+
 module.exports = {
   getCylindersFromReceipt,
   getCylindersByProvider,
   getCylindersBySerial,
   markCylinderAsRecharged,
   markCylinderAsNotRecharged,
+  updateCylinderPressure,
   mapCylinders,
   cylinderProps,
+  getCylinderPressure,
   cylindersCameFrom
 };
