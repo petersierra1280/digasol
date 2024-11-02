@@ -326,25 +326,25 @@ const {
         // Evitar problemas con el max rate del API de Notion
         await sleep();
 
+        if (!entityId) {
+          throw new Error(
+            `Recibo creado y estado del cilindro actualizado, pero no se encontro la entidad en Notion. Cilindro: ${serial}, localizacion: ${localizacion}`
+          );
+        }
+
         console.log(separador);
 
         //#endregion
       } catch (error) {
         const { message, stack } = error;
         recibosErrorOutput.push({
-          prestado_a: localizacion,
-          tipo_prestamo: tipoPrestamo,
-          fecha_entrada: fechaEntrada,
-          fecha_salida: fechaSalida,
-          fecha_retorno: fechaRetorno,
-          cilindro: serial,
-          estado,
+          ...cilindro,
           error: {
             message,
             stack
           }
         });
-        console.error(`Error procesando cilindro ${serial}: ${message} | ${stack}`);
+        console.error(`Error procesando cilindro ${serial}: ${message}\n${stack}`);
         console.log(separador);
       }
     }
