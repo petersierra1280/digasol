@@ -503,6 +503,7 @@ const {
       break;
 
     case 'remove':
+      throw new Error('Comando deshabilitado');
       await deleteAllReceipts();
       break;
 
