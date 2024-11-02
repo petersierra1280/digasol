@@ -266,6 +266,9 @@ const {
           case prestamos.proveedor:
             entityInfo = await getProviderInformation(localizacion);
             break;
+
+          case 'N/A':
+            throw new Error(`No se encontro el cliente o proveedor: ${localizacion}`);
         }
         entityId = entityInfo?.id;
 
@@ -342,6 +345,7 @@ const {
           }
         });
         console.error(`Error procesando cilindro ${serial}: ${message} | ${stack}`);
+        console.log(separador);
       }
     }
 
