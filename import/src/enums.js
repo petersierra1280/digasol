@@ -14,6 +14,7 @@ const receiptStatus = {
 
 const providersFromImport = {
   DIGASOL: 'Digasol',
+  'DIGASOL-DAÑADOS': 'Digasol',
   'DOMICILIOS CRISTOBAL': 'Domicilios Cristobal',
   AGA: 'AGA (Messer Colombia S.A.)',
   'GASES DE LA COSTA CTG': 'Gases de la Costa',
