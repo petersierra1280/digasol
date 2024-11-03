@@ -28,8 +28,7 @@ const getCylindersFromReceipt = (receiptId) => `{
 }`;
 
 const getCylindersByProvider = (providerName, cursorId) => {
-    let query =
-        `"filter": {
+  let query = `"filter": {
                 "and": [
                     {
                         "property": "Nombre proveedor comparar",
@@ -43,41 +42,138 @@ const getCylindersByProvider = (providerName, cursorId) => {
                     }
                 ]
             }`;
-    if (cursorId) {
-        query += `, "start_cursor": "${cursorId}"`;
-    }
-    return `{ ${query} }`;
+  if (cursorId) {
+    query += `, "start_cursor": "${cursorId}"`;
+  }
+  return `{ ${query} }`;
 };
 
-function mapCylinders(item, cameFrom) {
-    const { properties, id } = item;
-    const baseProps = {
-        id,
-        serial: properties["Serial"].title[0].plain_text
-    };
-    switch (cameFrom) {
-        case 'INVENTORY':
-            baseProps.clase_gas = properties["Clase de gas"].select.name;
-            baseProps.cantidad_producto = properties["Cantidad producto"].formula.number;
-            break;
-        case 'COMPARISON':
-            const { type, date = {} } = properties["Recepcion proveedor"].formula;
-            baseProps.recepcion_proveedor = type === 'date' ? date.start : '';
-            baseProps.detalles_devolucion = properties["Detalles devolucion proveedor"].formula.string
-            break;
+const getCylindersBySerial = (serial) => `{
+    "filter": {
+        "and": [
+            {
+                "property": "Serial",
+                "rich_text": {
+                    "equals": "${serial}"
+                }
+            }
+        ]
     }
-    return baseProps;
+}`;
+
+const updateCylinderRechargeStatus = (rechargeStatus) => `{
+    "properties": {
+        "Recarga": {
+            "status": {
+                "name": "${rechargeStatus}"
+            }
+        }
+    }
+}`;
+
+const updateCylinderPressure = (pressure) => {
+  return {
+    key: 'Presion',
+    value: `{
+        "number": ${pressure}
+    }`
+  };
 };
 
-// Se filtran las siguientes props: Clase de gas, cantidad producto
-const cylindersInventoryFilteredProps = ["nwIs", "mGna", "title"];
-// Recepcion proveedor y Detalles devolucion proveedor
-const cylindersComparisonFilteredProps = ["aUM%5E", "title", "WLxn"];
+const cylindersRechargeStatus = {
+  not_charged: 'Por recargar',
+  in_progress: 'En recarga proveedor',
+  charged: 'Recargado'
+};
+
+function mapCylinders(item, cameFrom = '') {
+  const { properties, id } = item;
+  const baseProps = {
+    id,
+    serial: properties['Serial'].title[0].plain_text
+  };
+  switch (cameFrom) {
+    case cylindersCameFrom.inventory:
+      baseProps.clase_gas = properties['Clase de gas'].select.name;
+      baseProps.cantidad_producto = properties['Cantidad producto'].formula.number;
+      break;
+    case cylindersCameFrom.comparison: {
+      const { type, date = {} } = properties['Recepcion proveedor'].formula;
+      baseProps.recepcion_proveedor = type === 'date' ? date.start : '';
+      baseProps.detalles_devolucion = properties['Detalles devolucion proveedor'].formula.string;
+      break;
+    }
+    case cylindersCameFrom.receipts:
+      baseProps.proveedor = properties['Proveedor']?.relation[0]?.id;
+      break;
+  }
+  return baseProps;
+}
+
+const cylindersCameFrom = {
+  inventory: 'INVENTORY',
+  comparison: 'COMPARISON',
+  receipts: 'RECEIPTS'
+};
+
+const cylinderProps = (cameFrom) => {
+  switch (cameFrom) {
+    case cylindersCameFrom.inventory:
+      // Clase de gas, cantidad producto
+      return ['nwIs', 'mGna', 'title'];
+
+    case cylindersCameFrom.comparison:
+      // Recepcion proveedor y Detalles devolucion proveedor
+      return ['aUM%5E', 'title', 'WLxn'];
+
+    case cylindersCameFrom.receipts:
+      // ID del Proveedor
+      return ['title', 'OcWI'];
+  }
+};
+
+const getCylinderPressure = (unidadMedida, capacidad, claseDeGas, contenido) => {
+  const cantidadProducto = {
+    '1/4': 0.25,
+    '3/4': 0.75,
+    Lleno: 1,
+    Medio: 0.5,
+    Vacio: 0
+  };
+  let presionBase = 0;
+  switch (unidadMedida) {
+    case 'Kilogramos':
+    case 'Kg':
+      presionBase = 300;
+      break;
+
+    case 'Metros cubicos':
+    case 'M3':
+      if (capacidad >= 11 || ['Argon', 'Mezcla', 'AR', 'AGAMIX'].includes(claseDeGas)) {
+        presionBase = 2900;
+      } else {
+        presionBase = 2000;
+      }
+      break;
+
+    default:
+      presionBase = 2000;
+      break;
+  }
+
+  // Calculo en PSI de la presion del cilindro en base al contenido del frasco
+  return presionBase * cantidadProducto[contenido];
+};
 
 module.exports = {
-    getCylindersFromReceipt,
-    getCylindersByProvider,
-    mapCylinders,
-    cylindersInventoryFilteredProps,
-    cylindersComparisonFilteredProps
-}
+  getCylindersFromReceipt,
+  getCylindersByProvider,
+  getCylindersBySerial,
+  updateCylinderRechargeStatus,
+  updateCylinderPressure,
+  mapCylinders,
+  cylinderProps,
+  getCylinderPressure,
+  cylindersCameFrom,
+  cylindersRechargeStatus
+};
