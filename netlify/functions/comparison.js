@@ -21,34 +21,29 @@ const {
 //#endregion
 
 //#region Obtener cilindros del proveedor
-const getCylinders = async (providerName) => {
+const getCylinders = async (providerName, pageSize = 100, nextPage = null) => {
   const CYLINDERS_FILTERED_PROPS = mapFilteredProps(cylinderProps(cylindersCameFrom.comparison));
   const CYLINDERS_REQUEST_URL = `${NOTION_API_URL}/databases/${NOTION_DATABASE_CYLINDERS}/query${CYLINDERS_FILTERED_PROPS}`;
 
-  const cylinderItems = [];
-  let nextPage = null,
-    hasMore = true;
-  while (hasMore) {
-    const responseCylinders = await fetch(CYLINDERS_REQUEST_URL, {
-      keepalive: true,
-      method: 'POST',
-      headers,
-      body: getCylindersByProvider(providerName, nextPage)
-    });
-    const { results, next_cursor, has_more, status } = await responseCylinders.json();
-    if (status === 429) {
-      console.error('Notion API rate limit exceeded!');
-      break;
-    }
-    if (results) {
-      cylinderItems.push(
-        ...results.map((item) => mapCylinders(item, cylindersCameFrom.comparison))
-      );
-    }
-    nextPage = next_cursor;
-    hasMore = has_more;
+  const responseCylinders = await fetch(CYLINDERS_REQUEST_URL, {
+    keepalive: true,
+    method: 'POST',
+    headers,
+    body: getCylindersByProvider(providerName, nextPage, pageSize)
+  });
+  const result = await responseCylinders.json();
+  const { results, next_cursor, has_more, status } = result;
+  if (status === 429) {
+    console.error('Notion API rate limit exceeded!');
+    return { cylinderItems: [], hasMore: false, nextPage: null };
   }
-  return cylinderItems;
+  const cylinderItems = results.map((item) => mapCylinders(item, cylindersCameFrom.comparison));
+
+  return {
+    cylinderItems,
+    hasMore: has_more,
+    nextPage: next_cursor
+  };
 };
 //#endregion
 
@@ -182,20 +177,24 @@ const compareCylinders = async (comparisonItems, cylinders) => {
 exports.handler = async (event) => {
   try {
     const providerName = event.queryStringParameters.proveedor;
+    const pageSize = parseInt(event.queryStringParameters.pageSize || '100');
+    const nextPage = event.queryStringParameters.nextPage || null;
 
-    const [comparisonItems, cylinders] = await Promise.all([
+    const [comparisonItems, { cylinderItems, hasMore, nextPage: newNextPage }] = await Promise.all([
       await getComparisonItems(),
-      await getCylinders(providerName)
+      await getCylinders(providerName, pageSize, nextPage)
     ]);
 
-    const comparisonResults = await compareCylinders(comparisonItems, cylinders);
+    const comparisonResults = await compareCylinders(comparisonItems, cylinderItems);
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         providerName,
         totalComparisonItems: comparisonItems.length,
-        totalCylinders: cylinders.length,
+        totalCylinders: cylinderItems.length,
+        hasMore,
+        nextPage: newNextPage,
         ...comparisonResults
       })
     };
