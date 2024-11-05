@@ -14,6 +14,7 @@ async function getComparisonSummary(
     totalCylinders: 0
   }
 ) {
+  // eslint-disable-next-line no-undef
   const urlParams = new URLSearchParams(window.location.search);
   const providerName = urlParams.get(PROVIDER_QUERY_PARAM);
   if (providerName) {
@@ -60,6 +61,7 @@ async function getComparisonSummary(
 }
 
 function updateStatusHTML(HTMLcode) {
+  // eslint-disable-next-line no-undef
   document.getElementById('comparison-output').innerHTML = HTMLcode;
 }
 
