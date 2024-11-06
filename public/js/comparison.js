@@ -35,7 +35,6 @@ async function getComparisonSummary(
         // Accumulate data
         allComparisonData.providerName = comparisonData.providerName;
         allComparisonData.foundCylinders += comparisonData.foundCylinders;
-        allComparisonData.foundCylinders += comparisonData.foundCylinders;
         allComparisonData.notFoundCylinders += comparisonData.notFoundCylinders;
         allComparisonData.cylindersEqual += comparisonData.cylindersEqual;
         allComparisonData.cylindersWithDifferences += comparisonData.cylindersWithDifferences;
