@@ -197,7 +197,7 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         providerName,
         totalComparisonItems: comparisonItemsFiltered.length,
-        totalCylinders: cylinderItems.length,
+        totalCylinders: cylinderItems.size,
         hasMore,
         nextPage: newNextPage,
         ...comparisonResults
