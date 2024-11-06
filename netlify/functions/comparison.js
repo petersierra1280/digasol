@@ -37,7 +37,12 @@ const getCylinders = async (providerName, pageSize = 100, nextPage = null) => {
     console.error('Notion API rate limit exceeded!');
     return { cylinderItems: [], hasMore: false, nextPage: null };
   }
-  const cylinderItems = results.map((item) => mapCylinders(item, cylindersCameFrom.comparison));
+  const cylinderItems = new Map(
+    results.map((item) => {
+      const mappedCylinder = mapCylinders(item, cylindersCameFrom.comparison);
+      return [mappedCylinder.serial, mappedCylinder];
+    })
+  );
 
   return {
     cylinderItems,
@@ -102,9 +107,7 @@ const compareCylinders = async (comparisonItems, cylinders) => {
           fecha_recepcion: receptionDateMapped = '',
           detalles_devolucion: comparisonReturnDetails = ''
         } = item;
-        const cylinderOwnedByDigasol = cylinders.find(
-          (cylinder) => cylinder.serial === serialCylinderProvider
-        );
+        const cylinderOwnedByDigasol = cylinders.get(serialCylinderProvider);
 
         if (cylinderOwnedByDigasol) {
           foundCylinders++;
@@ -184,14 +187,16 @@ exports.handler = async (event) => {
       await getComparisonItems(),
       await getCylinders(providerName, pageSize, nextPage)
     ]);
-
-    const comparisonResults = await compareCylinders(comparisonItems, cylinderItems);
+    const comparisonItemsFiltered = comparisonItems.filter((item) =>
+      cylinderItems.has(item.serial)
+    );
+    const comparisonResults = await compareCylinders(comparisonItemsFiltered, cylinderItems);
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         providerName,
-        totalComparisonItems: comparisonItems.length,
+        totalComparisonItems: comparisonItemsFiltered.length,
         totalCylinders: cylinderItems.length,
         hasMore,
         nextPage: newNextPage,
