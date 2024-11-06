@@ -42,7 +42,6 @@ async function getComparisonSummary(
         allComparisonData.cylindersReturnedToProvider += comparisonData.cylindersReturnedToProvider;
         allComparisonData.totalComparisonItems += comparisonData.totalComparisonItems;
         allComparisonData.totalCylinders += comparisonData.totalCylinders;
-        allComparisonData.totalCylinders += comparisonData.totalCylinders;
 
         // If more cylinders are available, recursively fetch the next page
         if (comparisonData.hasMore) {
