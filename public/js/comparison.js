@@ -1,6 +1,7 @@
 const PROVIDER_QUERY_PARAM = 'proveedor';
 const MAX_ATTEMPTS = 10;
 const PAGE_SIZE = 100;
+const SUCCESSFUL_HTTP_STATUS = 200;
 
 async function getComparisonSummary(
   nextPage = null,
@@ -29,9 +30,9 @@ async function getComparisonSummary(
       requestStatus = status;
       attempts++;
 
-      if (status === 200) {
+      if (status === SUCCESSFUL_HTTP_STATUS) {
         const comparisonData = await response.json();
-        
+
         // Accumulate data
         allComparisonData.providerName = comparisonData.providerName;
         allComparisonData.foundCylinders += comparisonData.foundCylinders;
@@ -50,7 +51,7 @@ async function getComparisonSummary(
           writeSummary(allComparisonData);
         }
       }
-    } while (requestStatus != 200 && attempts < MAX_ATTEMPTS);
+    } while (requestStatus != SUCCESSFUL_HTTP_STATUS && attempts < MAX_ATTEMPTS);
 
     if (requestStatus === 500) {
       showErrorMessage();
