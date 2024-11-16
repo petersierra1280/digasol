@@ -504,6 +504,7 @@ const {
 
     case 'remove':
       throw new Error('Comando deshabilitado');
+      // eslint-disable-next-line no-unreachable
       await deleteAllReceipts();
       break;
 

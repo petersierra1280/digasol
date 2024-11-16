@@ -27,7 +27,7 @@ const getCylindersFromReceipt = (receiptId) => `{
     }
 }`;
 
-const getCylindersByProvider = (providerName, cursorId) => {
+const getCylindersByProvider = (providerName, cursorId, pageSize) => {
   let query = `"filter": {
                 "and": [
                     {
@@ -44,6 +44,9 @@ const getCylindersByProvider = (providerName, cursorId) => {
             }`;
   if (cursorId) {
     query += `, "start_cursor": "${cursorId}"`;
+  }
+  if (pageSize) {
+    query += `, "page_size": ${pageSize}`;
   }
   return `{ ${query} }`;
 };
