@@ -165,7 +165,37 @@ const getCylinderPressure = (unidadMedida, capacidad, claseDeGas, contenido) => 
   }
 
   // Calculo en PSI de la presion del cilindro en base al contenido del frasco
-  return presionBase * cantidadProducto[contenido];
+  return presionBase * (cantidadProducto[contenido] || 0);
+};
+
+const mapKindOfGas = (claseDeGas) => {
+  const clasesDeGases = {
+    C2H2: 'Acetileno',
+    AGAFIESTA: 'Agafiesta',
+    AGAMIX: 'Mezcla',
+    AIRE: 'Aire comprimido',
+    AR: 'Argon',
+    CO2: 'CO2',
+    PROPANO: 'Propano',
+    HE: 'Helio Alta Pureza',
+    HEUAP: 'Helio Ultra Alta Pureza',
+    N2: 'Nitrogeno gaseoso',
+    N2LQ: 'Nitrogeno liquido',
+    O2: 'Oxigeno gaseoso',
+    TERMO: 'Oxigeno liquido',
+    O2M: 'Oxigeno medicinal',
+    O2SS: 'Oxigeno super seco'
+  };
+  return clasesDeGases[claseDeGas];
+};
+
+const mapUnitOfMeasurement = (unidad) => {
+  const unidades = {
+    M3: 'Metros cubicos',
+    Kg: 'Kilogramos',
+    Lt: 'Litros'
+  };
+  return unidades[unidad];
 };
 
 module.exports = {
@@ -177,6 +207,8 @@ module.exports = {
   mapCylinders,
   cylinderProps,
   getCylinderPressure,
+  mapKindOfGas,
+  mapUnitOfMeasurement,
   cylindersCameFrom,
   cylindersRechargeStatus
 };
