@@ -257,23 +257,28 @@ const {
         //#region Proceso de importacion de los recibos
 
         // 1. Obtener informacion del cliente/proveedor -> ID de la pagina
-        let entityInfo, entityId;
+        let entityId, entityPromise;
         switch (tipoPrestamo) {
           case prestamos.cliente:
-            entityInfo = await getClientInformation(localizacion);
+            entityPromise = getClientInformation(localizacion);
             break;
 
           case prestamos.proveedor:
-            entityInfo = await getProviderInformation(localizacion);
+            entityPromise = getProviderInformation(localizacion);
             break;
 
           case 'N/A':
             throw new Error(`No se encontro el cliente o proveedor: ${localizacion}`);
         }
+
+        const [entityInfo, cylinderInfo] = await Promise.all([
+          entityPromise,
+          getCylinderInformation(serial)
+        ]);
+
         entityId = entityInfo?.id;
 
         // 2. Obtener informacion del cilindro asociado -> ID de de la pagina
-        const cylinderInfo = await getCylinderInformation(serial);
         const cylinderPageId = cylinderInfo?.id;
 
         const existsReceipt = await getReceiptListByCylinder(cylinderPageId);
@@ -312,8 +317,6 @@ const {
         }
         receiptItem[tipoPrestamo === prestamos.cliente ? 'cliente_id' : 'proveedor_id'] = entityId;
 
-        await createReceipt(receiptItem);
-
         // 4. Actualizar el cilindro asociado -> Estado recargado (siempre y cuando el prestamo este en progreso) | actualizar la presion mas reciente
         const cylinderPressure = getCylinderPressure(
           unidadMedida,
@@ -321,7 +324,11 @@ const {
           claseDeGas,
           contenido
         );
-        await updateCylinderStatus(cylinderPageId, estadoRecargaCilindro, cylinderPressure);
+
+        await Promise.all([
+          createReceipt(receiptItem),
+          updateCylinderStatus(cylinderPageId, estadoRecargaCilindro, cylinderPressure)
+        ]);
 
         // Evitar problemas con el max rate del API de Notion
         await sleep();
