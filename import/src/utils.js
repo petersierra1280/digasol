@@ -32,6 +32,13 @@ const validateStringDate = (date, defaultValue = true) => {
     : date;
 };
 
+// This function expects a date in format MM/dd/yyyy
+function formatDate(dateStr) {
+  if (dateStr === 'NULL') return '';
+  const [month, day, year] = dateStr.split('/');
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+}
+
 const DIGASOL = 'DIGASOL';
 
 const isCylinderInDigasol = (localization) => {
@@ -52,6 +59,7 @@ module.exports = {
   sleep,
   getCurrentDate,
   validateStringDate,
+  formatDate,
   isCylinderInDigasol,
   getProcessDurationInMins
 };
