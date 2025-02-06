@@ -177,14 +177,15 @@ const mapKindOfGas = (claseDeGas) => {
     AR: 'Argon',
     CO2: 'CO2',
     PROPANO: 'Propano',
-    HE: 'Helio Alta Pureza',
-    HEUAP: 'Helio Ultra Alta Pureza',
+    HE: 'Helio alta pureza',
+    HEUAP: 'Helio ultra alta pureza',
     N2: 'Nitrogeno gaseoso',
     N2LQ: 'Nitrogeno liquido',
     O2: 'Oxigeno gaseoso',
     TERMO: 'Oxigeno liquido',
     O2M: 'Oxigeno medicinal',
-    O2SS: 'Oxigeno super seco'
+    O2SS: 'Oxigeno super seco',
+    AGASOL: 'Agasol',
   };
   return clasesDeGases[claseDeGas];
 };
