@@ -3,6 +3,7 @@ const { TZ = 'America/Bogota' } = process.env;
 const { daysBetween, formatDateWithTime } = require('../utils/index');
 
 const getBorrowedReceipts = `{
+    "page_size": 50,
     "filter": {
         "and": [
             {
